@@ -31,12 +31,14 @@ dill
 distributed
 docker-py
 filechunkio
-flake8==3.5.0
+# flake8==3.5.0
+flake8
 flask
 flask-admin
 flask-bcrypt
 flask-cache
-flask-login==0.2.11
+# flask-login==0.2.11
+flask-login
 Flask-WTF
 flower
 freezegun
@@ -49,13 +51,15 @@ hdfs
 hive-thrift-py
 ipython
 jaydebeapi
-jinja2<2.9.0
+# jinja2<2.9.0
+jinja2
 jira
 ldap3
 lxml
 markdown
 mock
-moto==1.1.19
+# moto==1.1.19
+moto
 mysqlclient
 nose
 nose-exclude
@@ -66,7 +70,8 @@ pandas-gbq
 parameterized
 paramiko>=2.1.1
 pendulum>=1.3.2
-psutil>=4.2.0, <5.0.0
+# psutil>=4.2.0, <5.0.0
+psutil
 psycopg2
 pygments
 pyhive
@@ -89,9 +94,11 @@ sphinx
 sphinx-argparse
 Sphinx-PyPI-upload
 sphinx_rtd_theme
-sqlalchemy>=1.1.15, <1.2.0
+# sqlalchemy>=1.1.15, <1.2.0
+sqlalchemy
 statsd
-tenacity==4.8.0
+# tenacity==4.8.0
+tenacity
 thrift
 thrift_sasl
 unicodecsv
