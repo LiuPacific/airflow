@@ -1,0 +1,17 @@
+cwlVersion: v1.2
+class: CommandLineTool
+baseCommand: echo
+inputs:
+  sentence_to_wc:
+    type: string
+    default: "Hello Harada"
+    inputBinding:
+      position: 1
+
+stdout: outfile1.txt
+
+outputs:
+  outfile1:
+    type: File
+    outputBinding:
+      glob: outfile1.txt
