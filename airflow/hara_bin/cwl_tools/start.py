@@ -10,6 +10,7 @@ from cwltool.process import Process
 from cwltool.utils import CWLObjectType
 import logging
 from typing import Union, Tuple, Optional
+from airflow.hara_bin.cwl_tools.hara_engine import controller, hara_workflow
 
 def load_cwl_workflow(cwl_file_path) -> dict:
     with open(cwl_file_path, 'r') as file:
@@ -43,10 +44,15 @@ def execute_cwl1(cwl_file, job_file):
     print("Execution result:", result)
 
 
-def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_process: workflow.Workflow):
+def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_process: hara_workflow.HaraWorkflow):
     runtime_context = hara_runtime_context.copy()
     runtime_context.basedir = os.getcwd()
     runtime_context.outdir = os.getcwd()
+
+    # runtime_context.tmpdir_prefix = '/home/typingliu/temp/'
+    runtime_context.tmp_outdir_prefix= '/home/typingliu/temp/'
+    runtime_context.tmpdir = '/home/typingliu/temp/tmpdir/'
+
 
     # Load job parameters from a YAML or JSON file
     with open(job_file_path) as job_params:
