@@ -229,11 +229,12 @@ class HaraCwlEngine:
         # the following is to run a workflow, inside which the workflow is split into multiple steps.
 
         # current_job_name = 'workflow'
-        # current_job_name = 'writeMessage'
+        current_job_name = 'writeMessage'
         # current_job_name = 'countWords'
         # is_final_node = False
         is_final_node = True
 
+        # hara changed
         # self.run_job(process, job_order_object, logger, runtime_context, current_job_name)
         self.run_jobs(process, job_order_object, logger, runtime_context)
         if runtime_context.validate_only is True:
@@ -299,7 +300,8 @@ class HaraCwlEngine:
         job_order_object: CWLObjectType,
         logger: logging.Logger,
         runtime_context: RuntimeContext,
-        current_job_name: str
+        current_job_name: str,
+        is_last_node: bool
     ) -> None:
         # process_run_id: Optional[str] = None
 
@@ -355,6 +357,7 @@ class HaraCwlEngine:
                     #     )
                     #     return
 
+                    # hara changed
                     if job.name == current_job_name:
                         job.run(runtime_context)
                     # if job.name=='workflow':job.run(runtime_context)
@@ -363,13 +366,10 @@ class HaraCwlEngine:
 
                     # job.run(runtime_context)
 
-
-
-
-
-                else:
-                    logger.error("Workflow cannot make any more progress.")
-                    break
+                # hara changed
+                # else:
+                #     logger.error("Workflow cannot make any more progress.")
+                #     break
         except (
             ValidationException,
             WorkflowException,

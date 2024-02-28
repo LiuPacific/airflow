@@ -805,6 +805,7 @@ class HaraCommandLineTool(Process):
                 partial(check_adjust, self.path_check_mode.value, builder),
             )
 
+    #CommandLineTool.job()
     def job(
         self,
         job_order: CWLObjectType,
@@ -815,6 +816,10 @@ class HaraCommandLineTool(Process):
         enableReuse = workReuse.get("enableReuse", True) if workReuse else True
 
         jobname = uniquename(runtimeContext.name or shortname(self.tool.get("id", "job")))
+
+        # hara changed: outdir of each cmd node
+        runtimeContext.outdir = '/home/typingliu/temp/ourdir/'+jobname+'/'
+
         if runtimeContext.cachedir and enableReuse:
             cachecontext = runtimeContext.copy()
             cachecontext.outdir = "/out"
@@ -961,7 +966,7 @@ class HaraCommandLineTool(Process):
                 output_callbacks = partial(
                     update_status_output_callback, output_callbacks, jobcachelock
                 )
-
+        # here is in CommandLineTool.job()
         builder = self._init_job(job_order, runtimeContext)
 
         reffiles = copy.deepcopy(builder.files)

@@ -1,1 +1,1 @@
-5 /tmp/mozsb7_y/stg6e896820-2afe-483e-9acc-140f10154d76/outfile1.txt
+5 /home/typingliu/temp/stagedir/stgad4676b4-7ef1-426c-84cb-785787d0d086/outfile1.txt

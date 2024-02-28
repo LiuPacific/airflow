@@ -51,7 +51,9 @@ def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_pr
 
     # runtime_context.tmpdir_prefix = '/home/typingliu/temp/'
     runtime_context.tmp_outdir_prefix= '/home/typingliu/temp/'
-    runtime_context.tmpdir = '/home/typingliu/temp/tmpdir/'
+    # runtime_context.tmpdir = '/home/typingliu/temp/tmpdir/'
+    runtime_context.stagedir = '/home/typingliu/temp/stagedir/'
+    # runtime_context.outdir = '/home/typingliu/temp/outdir/'
 
 
     # Load job parameters from a YAML or JSON file

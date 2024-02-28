@@ -158,6 +158,8 @@ class HaraWorkflow(Process):
     ) -> "WorkflowStep":
         return WorkflowStep(toolpath_object, pos, loadingContext, parentworkflowProv)
 
+
+    #Workflow.job()
     def job(
         self,
         job_order: CWLObjectType,
@@ -461,7 +463,7 @@ class WorkflowStep(Process):
             field = shortname(inp["id"])
             if not inp.get("not_connected"):
                 step_input[field] = job_order[inp["id"]]
-
+        # here's in WorkflowStep.jib()
         try:
             yield from self.embedded_tool.job(
                 step_input,

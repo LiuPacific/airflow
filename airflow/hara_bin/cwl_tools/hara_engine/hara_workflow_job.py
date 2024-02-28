@@ -73,7 +73,7 @@ class WorkflowJobStep:
         runtimeContext.name = shortname(self.id)
 
         _logger.info("[%s] start", self.name)
-
+        # here's in workflowJobStep.job()
         yield from self.step.job(joborder, output_callback, runtimeContext)
 
 
@@ -577,6 +577,10 @@ class HaraWorkflowJob:
         step.iterable = None
         self.made_progress = True
 
+        # hara changed: if there's no tail nodes, do output.
+        # if step.name == 'step countWords':
+        #     self.do_output_callback(final_output_callback)
+
         completed = sum(1 for s in self.steps if s.completed)
         if completed == len(self.steps):
             self.do_output_callback(final_output_callback)
@@ -778,6 +782,8 @@ class HaraWorkflowJob:
 
         runtimeContext = runtimeContext.copy()
         runtimeContext.outdir = None
+
+
         debug = runtimeContext.debug
 
         for index, inp in enumerate(self.tool["inputs"]):
@@ -818,6 +824,7 @@ class HaraWorkflowJob:
 
                 if step.iterable is not None:
                     try:
+                        # here is in WorkflowJob.job()
                         for newjob in step.iterable:
                             if (
                                 getdefault(runtimeContext.on_error, "stop") == "stop"
