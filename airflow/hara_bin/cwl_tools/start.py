@@ -11,6 +11,7 @@ from cwltool.utils import CWLObjectType
 import logging
 from typing import Union, Tuple, Optional
 from airflow.hara_bin.cwl_tools.hara_engine import controller, hara_workflow
+from airflow.hara_bin.cwl_tools.hara_engine import constants
 
 def load_cwl_workflow(cwl_file_path) -> dict:
     with open(cwl_file_path, 'r') as file:
@@ -49,12 +50,16 @@ def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_pr
     runtime_context.basedir = os.getcwd()
     runtime_context.outdir = os.getcwd()
 
-    # runtime_context.tmpdir_prefix = '/home/typingliu/temp/'
+    runtime_context.tmpdir_prefix = '/home/typingliu/temp/'
     runtime_context.tmp_outdir_prefix= '/home/typingliu/temp/'
     # runtime_context.tmpdir = '/home/typingliu/temp/tmpdir/'
     runtime_context.stagedir = '/home/typingliu/temp/stagedir/'
-    # runtime_context.outdir = '/home/typingliu/temp/outdir/'
+    runtime_context.outdir = '/home/typingliu/temp/outdir/'
 
+
+    step_to_run = 'writeMessage'; is_final_step=False;
+    # step_to_run = 'countWords'; is_final_step=True;
+    constants.init_hara_context(step_to_run, is_final_step)
 
     # Load job parameters from a YAML or JSON file
     with open(job_file_path) as job_params:
@@ -62,7 +67,7 @@ def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_pr
 
     # h_executor = SingleJobExecutor()
     hara_cwl_engine = controller.HaraCwlEngine()
-    out, status = hara_cwl_engine.split_workflow(process=workflow_process, job_order_object=job_file_items, runtime_context=runtime_context)
+    out, status = hara_cwl_engine.hara_execute(process=workflow_process, job_order_object=job_file_items, runtime_context=runtime_context)
     # out, status = h_executor(workflow_process, job_file_items, runtime_context=runtime_context)
     if status != "success":
         raise controller.HaraWorkflowStatus(out, status)

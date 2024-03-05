@@ -1,8 +1,9 @@
 import yaml
-from cwltool.context import LoadingContext, RuntimeContext
+from cwltool.context import LoadingContext
 from cwltool.factory import Factory
 from cwltool.executors import SingleJobExecutor
 from cwltool.load_tool import load_tool
+from airflow.hara_bin.cwl_tools.hara_engine.hara_context import  RuntimeContext
 
 def load_cwl_workflow(cwl_file_path):
     with open(cwl_file_path, 'r') as file:

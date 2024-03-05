@@ -9,7 +9,7 @@ from cwltool.executors import JobExecutor, SingleJobExecutor
 from cwltool.process import Process
 from cwltool.utils import CWLObjectType
 from cwltool import workflow
-from cwltool.context import RuntimeContext, getdefault
+from cwltool.context import getdefault
 from cwltool.cuda import cuda_version_and_device_count
 from cwltool.cwlprov.provenance_profile import ProvenanceProfile
 from cwltool.errors import WorkflowException
@@ -65,7 +65,7 @@ from airflow.hara_bin.cwl_tools.hara_engine import cmdlinetool_runner
 from airflow.hara_bin.cwl_tools.hara_engine import hara_command_line_tool, hara_workflow, hara_load_tool, hara_job, \
     hara_workflow_job
 import pickle
-
+from airflow.hara_bin.cwl_tools.hara_engine import constants
 
 # refer to factory.WorkflowStatus
 class HaraWorkflowStatus(Exception):
@@ -161,7 +161,7 @@ class HaraCwlEngine:
 
     # refer to /home/typingliu/.conda/envs/airflow21_dev2/lib/python3.8/site-packages/cwltool/executors.py
     # class JobExecutor(metaclass=ABCMeta):     def execute(
-    def split_workflow(
+    def hara_execute(
         self,
         process: Process,
         job_order_object: CWLObjectType,
@@ -228,19 +228,13 @@ class HaraCwlEngine:
 
         # the following is to run a workflow, inside which the workflow is split into multiple steps.
 
-        # current_job_name = 'workflow'
-        current_job_name = 'writeMessage'
-        # current_job_name = 'countWords'
-        # is_final_node = False
-        is_final_node = True
 
-        # hara changed
-        # self.run_job(process, job_order_object, logger, runtime_context, current_job_name)
+        # hara changed: pass into which step to run
         self.run_jobs(process, job_order_object, logger, runtime_context)
         if runtime_context.validate_only is True:
             return (None, "ValidationSuccess")
 
-        if is_final_node:
+        if constants.get_hara_context().is_final_step:
             if self.final_output and self.final_output[0] is not None and finaloutdir is not None:
                 self.final_output[0] = relocateOutputs(
                     self.final_output[0],
@@ -294,91 +288,6 @@ class HaraCwlEngine:
 
     # refer to /home/typingliu/.conda/envs/airflow21_dev2/lib/python3.8/site-packages/cwltool/executors.py
     # class SingleJobExecutor(JobExecutor): run_jobs
-    def run_job(
-        self,
-        process: Process,
-        job_order_object: CWLObjectType,
-        logger: logging.Logger,
-        runtime_context: RuntimeContext,
-        current_job_name: str,
-        is_last_node: bool
-    ) -> None:
-        # process_run_id: Optional[str] = None
-
-        # define provenance profile for single commandline tool
-        if not isinstance(process, hara_workflow.HaraWorkflow) and runtime_context.research_obj is not None:
-            process.provenance_object = ProvenanceProfile(
-                runtime_context.research_obj,
-                full_name=runtime_context.cwl_full_name,
-                host_provenance=False,
-                user_provenance=False,
-                orcid=runtime_context.orcid,
-                # single tool execution, so RO UUID = wf UUID = tool UUID
-                run_uuid=runtime_context.research_obj.ro_uuid,
-                fsaccess=runtime_context.make_fs_access(""),
-            )
-            process.parent_wf = process.provenance_object
-
-        jobiter = process.job(job_order_object, self.output_callback, runtime_context)
-        # cwltool.workflow.Workflow
-        try:
-            for job in jobiter:
-                if job is not None:
-                    if runtime_context.builder is not None and hasattr(job, "builder"):
-                        job.builder = runtime_context.builder
-                    if job.outdir is not None:
-                        self.output_dirs.add(job.outdir)
-                        logger.info("job tmp outdir:" + job.outdir)
-                    # if runtime_context.research_obj is not None:
-                    #     if not isinstance(process, Workflow):
-                    #         prov_obj = process.provenance_object
-                    #     else:
-                    #         prov_obj = job.prov_obj
-                    #     if prov_obj:
-                    #         runtime_context.prov_obj = prov_obj
-                    #         prov_obj.fsaccess = runtime_context.make_fs_access("")
-                    #         prov_obj.evaluate(
-                    #             process,
-                    #             job,
-                    #             job_order_object,
-                    #             runtime_context.research_obj,
-                    #         )
-                    #         process_run_id = prov_obj.record_process_start(process, job)
-                    #         runtime_context = runtime_context.copy()
-                    #     runtime_context.process_run_id = process_run_id
-                    # if runtime_context.validate_only is True:
-                    #     if isinstance(job, WorkflowJob):
-                    #         name = job.tool.lc.filename
-                    #     else:
-                    #         name = getattr(job, "name", str(job))
-                    #     print(
-                    #         f"{name} is valid CWL. No errors detected in the inputs.",
-                    #         file=runtime_context.validate_stdout,
-                    #     )
-                    #     return
-
-                    # hara changed
-                    if job.name == current_job_name:
-                        job.run(runtime_context)
-                    # if job.name=='workflow':job.run(runtime_context)
-                    # if job.name=='writeMessage': job.run(runtime_context)
-                    # if job.name=='countWords':job.run(runtime_context)
-
-                    # job.run(runtime_context)
-
-                # hara changed
-                # else:
-                #     logger.error("Workflow cannot make any more progress.")
-                #     break
-        except (
-            ValidationException,
-            WorkflowException,
-        ):  # pylint: disable=try-except-raise
-            raise
-        except Exception as err:
-            logger.exception("Got workflow error")
-            raise WorkflowException(str(err)) from err
-
     def run_jobs(
         self,
         process: Process,
@@ -402,7 +311,10 @@ class HaraCwlEngine:
             )
             process.parent_wf = process.provenance_object
 
+        ## hara changed
+        # jobiter = process.job(job_order_object, self.output_callback, runtime_context)
         jobiter = process.job(job_order_object, self.output_callback, runtime_context)
+        ## hara end
         # cwltool.workflow.Workflow
         try:
             for job in jobiter:
@@ -412,6 +324,7 @@ class HaraCwlEngine:
                     if job.outdir is not None:
                         self.output_dirs.add(job.outdir)
                         logger.info("job tmp outdir:" + job.outdir)
+                    ## hara changed: the code seems not important
                     # if runtime_context.research_obj is not None:
                     #     if not isinstance(process, Workflow):
                     #         prov_obj = process.provenance_object
@@ -441,11 +354,6 @@ class HaraCwlEngine:
                     #     return
 
                     job.run(runtime_context)
-
-
-
-
-
                 else:
                     logger.error("Workflow cannot make any more progress.")
                     break

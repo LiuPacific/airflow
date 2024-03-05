@@ -48,6 +48,7 @@ from cwltool.builder import (
     substitute,
 )
 from cwltool.context import LoadingContext, RuntimeContext, getdefault
+from cwltool.context import LoadingContext, getdefault
 from cwltool.docker import DockerCommandLineJob, PodmanCommandLineJob
 from cwltool.errors import UnsupportedRequirement, WorkflowException
 from cwltool.flatten import flatten
@@ -86,6 +87,7 @@ from cwltool.utils import (
 )
 
 from airflow.hara_bin.cwl_tools.hara_engine.hara_job import  Hara_CommandLineJob
+
 
 if TYPE_CHECKING:
     from cwltool.cwlprov.provenance_profile import (
@@ -818,7 +820,7 @@ class HaraCommandLineTool(Process):
         jobname = uniquename(runtimeContext.name or shortname(self.tool.get("id", "job")))
 
         # hara changed: outdir of each cmd node
-        runtimeContext.outdir = '/home/typingliu/temp/ourdir/'+jobname+'/'
+        runtimeContext.outdir = '/home/typingliu/temp/tmp_outdir/'+jobname+'/'
 
         if runtimeContext.cachedir and enableReuse:
             cachecontext = runtimeContext.copy()

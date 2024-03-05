@@ -46,6 +46,8 @@ if TYPE_CHECKING:
     from cwltool.cwlprov.provenance_profile import ProvenanceProfile
     from airflow.hara_bin.cwl_tools.hara_engine.hara_workflow import HaraWorkflow, WorkflowStep
 
+from airflow.hara_bin.cwl_tools.hara_engine import constants
+
 
 class WorkflowJobStep:
     """Generated for each step in Workflow.steps()."""
@@ -578,12 +580,16 @@ class HaraWorkflowJob:
         self.made_progress = True
 
         # hara changed: if there's no tail nodes, do output.
-        # if step.name == 'step countWords':
+        # if step.name == 'step countWords': if step.name!='workflow' and
         #     self.do_output_callback(final_output_callback)
 
-        completed = sum(1 for s in self.steps if s.completed)
-        if completed == len(self.steps):
+        ## hara changed: judge whether the current step is the last step
+        # completed = sum(1 for s in self.steps if s.completed)
+        # if completed == len(self.steps):
+        #     self.do_output_callback(final_output_callback)
+        if constants.get_hara_context().is_final_step:
             self.do_output_callback(final_output_callback)
+        ## end
 
     def try_make_job(
         self,
@@ -772,7 +778,7 @@ class HaraWorkflowJob:
         self,
         joborder: CWLObjectType,
         output_callback: Optional[OutputCallbackType],
-        runtimeContext: RuntimeContext,
+        runtimeContext: RuntimeContext
     ) -> JobsGeneratorType:
         self.state = {}
         self.processStatus = "success"
@@ -782,7 +788,6 @@ class HaraWorkflowJob:
 
         runtimeContext = runtimeContext.copy()
         runtimeContext.outdir = None
-
 
         debug = runtimeContext.debug
 
@@ -804,10 +809,18 @@ class HaraWorkflowJob:
                 self.state[out["id"]] = None
 
         completed = 0
-        while completed < len(self.steps):
+        ## hara changed: when the node is completed, stop the while loop.
+        # while completed < len(self.steps):
+        while completed == 0:
+            ## hara end
             self.made_progress = False
 
             for step in self.steps:
+                # hara changed: to choose which job to generate:
+                if step.name != 'step ' + constants.get_hara_context().step_to_run:
+                    continue
+                #### end;
+
                 if (
                     getdefault(runtimeContext.on_error, "stop") == "stop"
                     and self.processStatus != "success"
@@ -841,13 +854,15 @@ class HaraWorkflowJob:
                         _logger.debug("", exc_info=True)
                         self.processStatus = "permanentFail"
 
-            completed = sum(1 for s in self.steps if s.completed)
-
-            if not self.made_progress and completed < len(self.steps):
-                if self.processStatus != "success":
-                    break
-                else:
-                    yield None
+            ## TODO: hara changed: if one of the step has completed, it's successful.
+            completed = 1
+            # completed = sum(1 for s in self.steps if s.completed)
+            # if not self.made_progress and completed < len(self.steps):
+            #     if self.processStatus != "success":
+            #         break
+            #     else:
+            #         yield None
+            ## hara end
 
         if not self.did_callback and output_callback:
             # could have called earlier on line 336;

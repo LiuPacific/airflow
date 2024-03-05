@@ -43,6 +43,7 @@ from schema_salad.utils import json_dump, json_dumps
 from cwltool import env_to_stdout, run_job
 from cwltool.builder import Builder
 from cwltool.context import RuntimeContext
+
 from cwltool.cuda import cuda_check
 from cwltool.errors import UnsupportedRequirement, WorkflowException
 from cwltool.loghandler import _logger
