@@ -163,7 +163,7 @@ class HaraWorkflow(Process):
         self,
         job_order: CWLObjectType,
         output_callbacks: Optional[OutputCallbackType],
-        runtimeContext: RuntimeContext
+        runtimeContext: RuntimeContext,
     ) -> JobsGeneratorType:
         builder = self._init_job(job_order, runtimeContext)
 

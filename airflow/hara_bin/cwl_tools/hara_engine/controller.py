@@ -67,6 +67,7 @@ from airflow.hara_bin.cwl_tools.hara_engine import hara_command_line_tool, hara_
 import pickle
 from airflow.hara_bin.cwl_tools.hara_engine import constants
 
+
 # refer to factory.WorkflowStatus
 class HaraWorkflowStatus(Exception):
     def __init__(self, out: Optional[CWLObjectType], status: str) -> None:
@@ -228,13 +229,14 @@ class HaraCwlEngine:
 
         # the following is to run a workflow, inside which the workflow is split into multiple steps.
 
-
         # hara changed: pass into which step to run
         self.run_jobs(process, job_order_object, logger, runtime_context)
         if runtime_context.validate_only is True:
             return (None, "ValidationSuccess")
 
+        ## hara changed: when running in whole-workflow mode, it should be true, since the last node is a final node.
         if constants.get_hara_context().is_final_step:
+            ## hara end
             if self.final_output and self.final_output[0] is not None and finaloutdir is not None:
                 self.final_output[0] = relocateOutputs(
                     self.final_output[0],
@@ -260,7 +262,7 @@ class HaraCwlEngine:
                 if (
                     runtime_context.research_obj is not None
                     and isinstance(process, (
-                JobBase, Process, hara_workflow_job.WorkflowJobStep, hara_workflow_job.HaraWorkflowJob))
+                    JobBase, Process, hara_workflow_job.WorkflowJobStep, hara_workflow_job.HaraWorkflowJob))
                     and process.parent_wf
                 ):
                     process_run_id: Optional[str] = None
