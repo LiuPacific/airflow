@@ -1,8 +1,10 @@
 import copy
+import base64
 import datetime
 import functools
 import logging
 import threading
+import pickle
 from typing import (
     TYPE_CHECKING,
     Dict,
@@ -396,6 +398,18 @@ def object_from_state(
                     "declared."
                 )
             for src in connections:
+                ## hara changed: load state from third place. The current node have dependency on previous nodes' output, the information is stored in the third place out of the program
+                if constants.get_hara_context().is_separate_mode:
+                    workflowStateItem_pickled_base64 = constants.get_hara_context().kvdb.get(
+                        constants.get_hara_context().run_id + src)
+                    if workflowStateItem_pickled_base64 is None:
+                        raise WorkflowException("the dependency isn't sufficient to run the current node: " % (src))
+                    workflowStateItem_pickled = base64.b64decode(workflowStateItem_pickled_base64.encode("ascii"))
+                    workflowStateItem = pickle.loads(workflowStateItem_pickled)
+                    # state[inp["id"]] = workflowStateItem
+                    state[src] = workflowStateItem
+
+
                 a_state = state.get(src, None)
                 if a_state is not None and (
                     a_state.success in ("success", "skipped") or incomplete
@@ -558,7 +572,15 @@ class HaraWorkflowJob:
             if "id" in i:
                 iid = cast(str, i["id"])
                 if iid in jobout:
-                    self.state[iid] = WorkflowStateItem(i, jobout[iid], processStatus)
+                    ## hara changed: state information should be maintained in a third place.
+                    if constants.get_hara_context().is_separate_mode:
+                        workflowStateItem = WorkflowStateItem(i, jobout[iid], processStatus)
+                        workflowStateItem_pickled = pickle.dumps(workflowStateItem)
+                        workflowStateItem_pickled_base64 = base64.b64encode(workflowStateItem_pickled).decode("ascii")
+                        constants.get_hara_context().kvdb.set(constants.get_hara_context().run_id + iid,
+                                                              workflowStateItem_pickled_base64)
+                    else:
+                        self.state[iid] = WorkflowStateItem(i, jobout[iid], processStatus)
                 else:
                     _logger.error("[%s] Output is missing expected field %s", step.name, iid)
                     processStatus = "permanentFail"
@@ -584,7 +606,7 @@ class HaraWorkflowJob:
             if constants.get_hara_context().is_final_step:
                 self.do_output_callback(final_output_callback)
 
-        else: # In origin mode, if it's the last step, it will output using completed mechanism, which is to count the successful nodes.
+        else:  # In origin mode, if it's the last step, it will output using completed mechanism, which is to count the successful nodes.
             completed = sum(1 for s in self.steps if s.completed)
             if completed == len(self.steps):
                 self.do_output_callback(final_output_callback)
@@ -810,7 +832,8 @@ class HaraWorkflowJob:
         completed = 0
         ## hara changed: when the node is completed, stop the while loop.
         # while completed < len(self.steps):
-        while (constants.get_hara_context().is_separate_mode and completed == 0) or (not constants.get_hara_context().is_separate_mode and completed < len(self.steps)):
+        while (constants.get_hara_context().is_separate_mode and completed == 0) or (
+            not constants.get_hara_context().is_separate_mode and completed < len(self.steps)):
             ## hara end
             self.made_progress = False
 

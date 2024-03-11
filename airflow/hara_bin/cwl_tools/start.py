@@ -13,6 +13,7 @@ from typing import Union, Tuple, Optional
 from airflow.hara_bin.cwl_tools.hara_engine import controller, hara_workflow
 from airflow.hara_bin.cwl_tools.hara_engine import constants
 
+
 def load_cwl_workflow(cwl_file_path) -> dict:
     with open(cwl_file_path, 'r') as file:
         cwl_workflow = yaml.safe_load(file)
@@ -39,7 +40,7 @@ def execute_cwl1(cwl_file, job_file):
 
     # Execute the workflow with the job parameters
     result = controller.split_workflow(**job)
-     # = cwlexec(**job)
+    # = cwlexec(**job)
 
     # Print the execution result
     print("Execution result:", result)
@@ -51,15 +52,21 @@ def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_pr
     runtime_context.outdir = os.getcwd()
 
     runtime_context.tmpdir_prefix = '/home/typingliu/temp/'
-    runtime_context.tmp_outdir_prefix= '/home/typingliu/temp/'
+    runtime_context.tmp_outdir_prefix = '/home/typingliu/temp/'
     # runtime_context.tmpdir = '/home/typingliu/temp/tmpdir/'
     runtime_context.stagedir = '/home/typingliu/temp/stagedir/'
     runtime_context.outdir = '/home/typingliu/temp/outdir/'
 
+    run_id = 'abc'
+    file_kv_path = '/home/typingliu/temp/hara_kv_db.json'
+    # step_to_run = 'writeMessage';
+    # is_final_step = False;
+    # is_separate_mode = True;
+    step_to_run = 'countWords';
+    is_final_step = True;
+    is_separate_mode = True;
 
-    step_to_run = 'writeMessage'; is_final_step=False;
-    # step_to_run = 'countWords'; is_final_step=True;
-    constants.init_hara_context(step_to_run, is_final_step)
+    constants.init_hara_context(step_to_run, run_id, is_final_step, is_separate_mode, file_kv_path)
 
     # Load job parameters from a YAML or JSON file
     with open(job_file_path) as job_params:
@@ -67,14 +74,13 @@ def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_pr
 
     # h_executor = SingleJobExecutor()
     hara_cwl_engine = controller.HaraCwlEngine()
-    out, status = hara_cwl_engine.hara_execute(process=workflow_process, job_order_object=job_file_items, runtime_context=runtime_context)
+    out, status = hara_cwl_engine.hara_execute(process=workflow_process, job_order_object=job_file_items,
+                                               runtime_context=runtime_context)
     # out, status = h_executor(workflow_process, job_file_items, runtime_context=runtime_context)
     if status != "success":
         raise controller.HaraWorkflowStatus(out, status)
     else:
         return out
-
-
 
 
 if __name__ == "__main__":

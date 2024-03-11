@@ -189,7 +189,9 @@ class HaraCwlEngine:
         if isinstance(original_outdir, str):
             finaloutdir = os.path.abspath(original_outdir)
         runtime_context = runtime_context.copy()
+        ## hara TODO: check what does the outdir do in the copied runtime_context. It caused the occurance of a useless folder without being cleaned.
         outdir = runtime_context.create_outdir()
+        ## hara end
         self.output_dirs.add(outdir)
         runtime_context.outdir = outdir
         runtime_context.mutation_manager = MutationManager()
@@ -235,7 +237,11 @@ class HaraCwlEngine:
             return (None, "ValidationSuccess")
 
         ## hara changed: when running in whole-workflow mode, it should be true, since the last node is a final node.
-        if constants.get_hara_context().is_final_step:
+        if (
+            constants.get_hara_context().is_separate_mode and constants.get_hara_context().is_final_step
+        ) or (
+            not constants.get_hara_context().is_separate_mode
+        ):
             ## hara end
             if self.final_output and self.final_output[0] is not None and finaloutdir is not None:
                 self.final_output[0] = relocateOutputs(
