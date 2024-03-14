@@ -1,0 +1,8 @@
+accessibility_file_path:
+  class: File
+  path: "../.data/ok_od_travel_3hour.csv"
+zip_physician_file_path:
+  class: File
+  path: "../.data/ok_zip_acc.geojson"
+gauss_upper_limit: 0
+

@@ -1,0 +1,19 @@
+cwlVersion: v1.2
+class: Workflow
+inputs:
+  message_for_step1: string # input to wc
+steps:
+  writeMessage:
+    run: hara_write.cwl.yaml
+    in:
+      sentence_to_wc: message_for_step1
+    out: [outfile1]
+  countWords:
+    run: hara_wc.cwl.yaml
+    in:
+      infile: writeMessage/outfile1
+    out: [wordcount_result]
+outputs:
+  workflow_result_wc:
+    type: File
+    outputSource: countWords/wordcount_result

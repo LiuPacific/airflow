@@ -318,7 +318,10 @@ def post_dag_run(*, dag_id: str, session: Session = NEW_SESSION) -> APIResponse:
     )
     if not dagrun_instance:
         try:
-            dag = get_airflow_app().dag_bag.get_dag(dag_id)
+            # hara change starts: get dat to get_hara_serialized_dag
+            # dag = get_airflow_app().dag_bag.get_dag(dag_id)
+            dag = get_airflow_app().dag_bag.get_hara_serialized_dag(dag_id)
+            # hara change ends
             dag_run = dag.create_dagrun(
                 run_type=DagRunType.MANUAL,
                 run_id=run_id,

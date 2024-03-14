@@ -1,0 +1,23 @@
+#!/usr/bin/env cwl-runnerreason is I have some dag files name email.py. which is same as python internal lib name. the conflict lead to python stop work. After I rename the email.py to email_test.py. The problem solved.
+# cwltool ./hara_docker_hello.cwl.yaml --message_text="Hello Hara"
+cwlVersion: v1.2
+class: CommandLineTool
+baseCommand: # keep empty
+hints:
+  DockerRequirement:
+    dockerPull: echo-container:latest
+inputs:
+  sentence_to_wc:
+    type: string
+    default: "Hello Hara San"
+    inputBinding:
+      position: 1
+
+stdout: docker_out1.txt
+
+
+outputs:
+  out1:
+    type: stdout
+
+

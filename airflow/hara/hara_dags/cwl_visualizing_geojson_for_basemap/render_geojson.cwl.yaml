@@ -1,0 +1,50 @@
+cwlVersion: v1.2
+class: CommandLineTool
+baseCommand: python3
+inputs:
+  script_to_run:
+    type: File
+    inputBinding:
+      position: 1
+  source_geojson_file_path:
+    type: File
+    inputBinding:
+      position: 1
+  column_name_to_show:
+    type: string
+    default: "Ai"
+    inputBinding:
+      position: 2
+
+stdout: output.txt
+outputs:
+  png_output:
+    type: File
+    outputBinding:
+      glob: "*.png"
+  lon_left:
+    type: float
+    outputBinding:
+      loadContents: True
+      glob: "output.txt"
+      outputEval: $(parseFloat(self[0].contents.match(/lon_left=([0-9.e+-]+)/)[1]))
+  lat_bottom:
+    type: float
+    outputBinding:
+      loadContents: True
+      glob: "output.txt"
+      outputEval: $(parseFloat(self[0].contents.match(/lat_bottom=([0-9.e+-]+)/)[1]))
+  lon_right:
+    type: float
+    outputBinding:
+      loadContents: True
+      glob: "output.txt"
+      outputEval: $(parseFloat(self[0].contents.match(/lon_right=([0-9.e+-]+)/)[1]))
+  lat_top:
+    type: float
+    outputBinding:
+      loadContents: True
+      glob: "output.txt"
+      outputEval: $(parseFloat(self[0].contents.match(/lat_top=([0-9.e+-]+)/)[1]))
+requirements:
+  InlineJavascriptRequirement: {}

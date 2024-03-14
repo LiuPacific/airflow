@@ -1,0 +1,3 @@
+bucket_name: osu-geohealth
+# object_name: ok_od_travel_3hour.csv
+object_name: "ok_zip_acc.geojson"

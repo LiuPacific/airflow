@@ -233,3 +233,6 @@ licenses/LICENSES-ui.txt
 
 # used to checkout target-branch in CI
 /target-airflow
+
+# hara
+.data/

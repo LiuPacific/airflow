@@ -713,9 +713,11 @@ class SchedulerJob(BaseJob):
 
         self.log.info("Starting the scheduler")
 
+        # hara changed:
         # DAGs can be pickled for easier remote execution by some executors
-        pickle_dags = self.do_pickle and self.executor_class not in UNPICKLEABLE_EXECUTORS
-
+        # pickle_dags = self.do_pickle and self.executor_class not in UNPICKLEABLE_EXECUTORS
+        pickle_dags = self.do_pickle
+        # hara change ended
         self.log.info("Processing each file at most %s times", self.num_times_parse_dags)
 
         # When using sqlite, we do not use async_mode
@@ -769,7 +771,9 @@ class SchedulerJob(BaseJob):
                     self.log.info(
                         "Deactivating DAGs that haven't been touched since %s", execute_start_time.isoformat()
                     )
-                    DAG.deactivate_stale_dags(execute_start_time)
+                    # hara change starts: cancel the logic of deactivating dags by dag_file detection: since the mechanism of deleting dags is no longer relied on dag file detection
+                    # DAG.deactivate_stale_dags(execute_start_time)
+                    # hara change ends;
 
             settings.Session.remove()  # type: ignore
         except Exception:
@@ -1269,9 +1273,10 @@ class SchedulerJob(BaseJob):
         :return: Callback that needs to be executed
         """
         callback: DagCallbackRequest | None = None
-
-        dag = dag_run.dag = self.dagbag.get_dag(dag_run.dag_id, session=session)
-
+        # hara change starts: serialized_dag to hara_serialized_dag
+        # dag = dag_run.dag = self.dagbag.get_dag(dag_run.dag_id, session=session)
+        dag = dag_run.dag = self.dagbag.get_hara_serialized_dag(dag_run.dag_id, session=session)
+        # hara change ends
         if not dag:
             self.log.error("Couldn't find dag %s in DagBag/DB!", dag_run.dag_id)
             return callback

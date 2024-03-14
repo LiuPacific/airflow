@@ -2305,13 +2305,22 @@ class DAG(LoggingMixin):
         if dag and dag.pickle_id:
             dp = session.query(DagPickle).filter(DagPickle.id == dag.pickle_id).first()
         if not dp or dp.pickle != self:
-            dp = DagPickle(dag=self)
-            session.add(dp)
-            self.last_pickled = timezone.utcnow()
-            session.commit()
-            self.pickle_id = dp.id
+            # hara change starts:
+            if dag.pickle_id is None:
+                # hara change ended.
+                log.info("pickling dag id is %s", dag.dag_id)
+                dp = DagPickle(dag=self)
+                session.add(dp)
+                self.last_pickled = timezone.utcnow()
+                session.commit()
+                self.pickle_id = dp.id
+                # hara change starts: add pickle id to dag table
+                dag.pickle_id = dp.id
+                session.commit()
+                # hara change ended.
 
         return dp
+
 
     def tree_view(self) -> None:
         """Print an ASCII tree representation of the DAG."""
