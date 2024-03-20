@@ -1,17 +1,9 @@
-from airflow.hara.cwl_tools.hara_engine import controller
 import cwltool.main
 import yaml
-from cwltool.context import LoadingContext, RuntimeContext
+from cwltool.context import RuntimeContext
 import os
-from cwltool.executors import JobExecutor, SingleJobExecutor
-from cwltool import workflow
-from cwltool.loghandler import _logger
-from cwltool.process import Process
-from cwltool.utils import CWLObjectType
-import logging
-from typing import Union, Tuple, Optional
 from airflow.hara.cwl_tools.hara_engine import controller, hara_workflow
-from airflow.hara.cwl_tools.hara_engine import constants
+from airflow.hara.cwl_tools.config import constants
 from airflow.hara.cwl_tools.tools import cwl_log
 
 def load_cwl_workflow(cwl_file_path) -> dict:
@@ -46,25 +38,27 @@ def execute_cwl1(cwl_file, job_file):
     print("Execution result:", result)
 
 
-def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_process: hara_workflow.HaraWorkflow):
+def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_process: hara_workflow.HaraWorkflow,
+                tmpdir_prefix: str,
+                tmp_outdir_prefix: str,
+                stagedir : str,
+                outdir: str,
+                basedir: str,
+                run_id: str,
+                file_kv_path: str,
+                step_to_run: str,
+                is_final_step: bool,
+                is_separate_mode: bool
+                ):
     runtime_context = hara_runtime_context.copy()
-    runtime_context.basedir = os.getcwd()
-    runtime_context.outdir = os.getcwd()
+    runtime_context.basedir = basedir
+    # runtime_context.outdir = os.getcwd()
 
-    runtime_context.tmpdir_prefix = '/home/typingliu/temp/'
-    runtime_context.tmp_outdir_prefix = '/home/typingliu/temp/'
+    runtime_context.tmpdir_prefix = tmpdir_prefix
+    runtime_context.tmp_outdir_prefix = tmp_outdir_prefix
     # runtime_context.tmpdir = '/home/typingliu/temp/tmpdir/'
-    runtime_context.stagedir = '/home/typingliu/temp/stagedir/'
-    runtime_context.outdir = '/home/typingliu/temp/outdir/'
-
-    run_id = 'abc'
-    file_kv_path = '/home/typingliu/temp/hara_kv_db.json'
-    # step_to_run = 'writeMessage';
-    # is_final_step = False;
-    # is_separate_mode = True;
-    step_to_run = 'countWords';
-    is_final_step = True;
-    is_separate_mode = True;
+    runtime_context.stagedir = stagedir
+    runtime_context.outdir = outdir
 
     constants.init_hara_context(step_to_run, run_id, is_final_step, is_separate_mode, file_kv_path)
 
@@ -101,6 +95,25 @@ if __name__ == "__main__":
     workflow_process = hara_cwl_engine.load_configuration(cwl_file_path)
 
     # Execute the CWL workflow
-    execute_cwl(hara_cwl_engine.h_runtime_context, job_file_path, workflow_process=workflow_process)
+    tmpdir_prefix = '/home/typingliu/temp/'
+    tmp_outdir_prefix = '/home/typingliu/temp/'
+    # runtime_context.tmpdir = '/home/typingliu/temp/tmpdir/'
+    stagedir = '/home/typingliu/temp/stagedir/'
+    outdir = '/home/typingliu/temp/outdir/'
+
+    run_id = 'abc'
+    file_kv_path = '/home/typingliu/temp/hara_kv_db.json'
+    # step_to_run = 'writeMessage';
+    # is_final_step = False;
+    # is_separate_mode = True;
+    step_to_run = 'countWords';
+    is_final_step = True;
+    is_separate_mode = True;
+
+    execute_cwl(hara_cwl_engine.h_runtime_context, job_file_path, workflow_process=workflow_process,
+                tmpdir_prefix=tmpdir_prefix,tmp_outdir_prefix= tmp_outdir_prefix,
+                stagedir=stagedir, outdir=outdir, run_id=run_id,file_kv_path=file_kv_path,
+                step_to_run=step_to_run,is_final_step=is_final_step,is_separate_mode=is_separate_mode
+                )
 
     cwl_logger.info('finished')

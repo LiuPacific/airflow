@@ -46,9 +46,9 @@ from cwltool.utils import (
 
 if TYPE_CHECKING:
     from cwltool.cwlprov.provenance_profile import ProvenanceProfile
-    from airflow.hara.cwl_tools.hara_engine.hara_workflow import HaraWorkflow, WorkflowStep
+    from airflow.hara.cwl_tools.hara_engine.hara_workflow import WorkflowStep
 
-from airflow.hara.cwl_tools.hara_engine import constants
+from airflow.hara.cwl_tools.config import constants
 
 
 class WorkflowJobStep:

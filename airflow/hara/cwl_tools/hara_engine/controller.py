@@ -1,38 +1,12 @@
-import os
-from typing import Any, Dict, Optional, Union, Tuple, MutableMapping
+from typing import Any, MutableMapping
 from ruamel.yaml.comments import CommentedMap
-import cwltool.workflow
-from cwltool import load_tool
-from cwltool.context import LoadingContext, RuntimeContext
-from cwltool.errors import WorkflowException
-from cwltool.executors import JobExecutor, SingleJobExecutor
-from cwltool.process import Process
-from cwltool.utils import CWLObjectType
-from cwltool import workflow
-from cwltool.context import getdefault
-from cwltool.cuda import cuda_version_and_device_count
-from cwltool.cwlprov.provenance_profile import ProvenanceProfile
-from cwltool.errors import WorkflowException
-from cwltool.job import JobBase
-from cwltool.loghandler import _logger
-from cwltool.mutation import MutationManager
-from cwltool.process import Process, cleanIntermediate, relocateOutputs
-from cwltool.task_queue import TaskQueue
-from cwltool.update import ORIGINAL_CWLVERSION
-from cwltool.utils import CWLObjectType, JobsType
-from cwltool import command_line_tool
-import logging
-from typing import Optional, Union
+from cwltool.context import LoadingContext
+from cwltool.executors import JobExecutor
 import datetime
-import functools
 import logging
-import math
 import os
 import threading
-from abc import ABCMeta, abstractmethod
-from threading import Lock
 from typing import (
-    Dict,
     Iterable,
     List,
     MutableSequence,
@@ -43,29 +17,22 @@ from typing import (
     cast,
 )
 
-import psutil
-from mypy_extensions import mypyc_attr
 from schema_salad.exceptions import ValidationException
 from schema_salad.sourceline import SourceLine
 
-from cwltool.command_line_tool import CallbackJob, ExpressionJob
 from cwltool.context import RuntimeContext, getdefault
-from cwltool.cuda import cuda_version_and_device_count
 from cwltool.cwlprov.provenance_profile import ProvenanceProfile
 from cwltool.errors import WorkflowException
 from cwltool.job import JobBase
 from cwltool.loghandler import _logger
 from cwltool.mutation import MutationManager
 from cwltool.process import Process, cleanIntermediate, relocateOutputs
-from cwltool.task_queue import TaskQueue
 from cwltool.update import ORIGINAL_CWLVERSION
-from cwltool.utils import CWLObjectType, JobsType
+from cwltool.utils import CWLObjectType
 # from cwltool.workflow import Workflow
-from airflow.hara.cwl_tools.hara_engine import cmdlinetool_runner
-from airflow.hara.cwl_tools.hara_engine import hara_command_line_tool, hara_workflow, hara_load_tool, hara_job, \
+from airflow.hara.cwl_tools.hara_engine import hara_command_line_tool, hara_workflow, hara_load_tool, \
     hara_workflow_job
-import pickle
-from airflow.hara.cwl_tools.hara_engine import constants
+from airflow.hara.cwl_tools.config import constants
 from airflow.hara.cwl_tools.tools import cwl_log
 
 # refer to factory.WorkflowStatus
