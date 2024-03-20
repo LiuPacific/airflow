@@ -400,14 +400,15 @@ def object_from_state(
             for src in connections:
                 ## hara changed: load state from third place. The current node have dependency on previous nodes' output, the information is stored in the third place out of the program
                 if constants.get_hara_context().is_separate_mode:
-                    workflowStateItem_pickled_base64 = constants.get_hara_context().kvdb.get(
-                        constants.get_hara_context().run_id + src)
-                    if workflowStateItem_pickled_base64 is None:
-                        raise WorkflowException("the dependency isn't sufficient to run the current node: " % (src))
-                    workflowStateItem_pickled = base64.b64decode(workflowStateItem_pickled_base64.encode("ascii"))
-                    workflowStateItem = pickle.loads(workflowStateItem_pickled)
-                    # state[inp["id"]] = workflowStateItem
-                    state[src] = workflowStateItem
+                    if state[src] is None:
+                        workflowStateItem_pickled_base64 = constants.get_hara_context().kvdb.get(
+                            constants.get_hara_context().run_id + src)
+                        if workflowStateItem_pickled_base64 is not None:
+                            # raise WorkflowException("the dependency isn't sufficient to run the current node: " % (src))
+                            workflowStateItem_pickled = base64.b64decode(workflowStateItem_pickled_base64.encode("ascii"))
+                            workflowStateItem = pickle.loads(workflowStateItem_pickled)
+                            # state[inp["id"]] = workflowStateItem
+                            state[src] = workflowStateItem
 
 
                 a_state = state.get(src, None)

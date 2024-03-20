@@ -1,12 +1,20 @@
 import json
+import os.path
 import threading
 from typing import Any
 from airflow.hara.cwl_tools.tools.abstract_kv import AbstractKVDB
+
 
 class SimpleFileKVDB(AbstractKVDB):
     def __init__(self, file_path: str):
         self.file_path = file_path
         self.lock = threading.Lock()  # Use multiprocessing.Lock() for multi-process scenarios
+        dir_path = os.path.dirname(file_path)
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+        if not os.path.exists(file_path):
+            with open(file_path, 'w') as file:
+                file.write('{}')
 
     def _load_data(self) -> dict:
         try:
@@ -36,6 +44,7 @@ class SimpleFileKVDB(AbstractKVDB):
             if key in data:
                 del data[key]
                 self._write_data(data)
+
 
 ## hara TODO: the locking mechanism remains to upgrade. it couldn't avoid the unexpected writting between load and writing in this program.
 if __name__ == '__main__':

@@ -12,6 +12,7 @@ import logging
 from typing import Union, Tuple, Optional
 from airflow.hara.cwl_tools.hara_engine import controller, hara_workflow
 from airflow.hara.cwl_tools.hara_engine import constants
+from airflow.hara.cwl_tools.tools import cwl_log
 
 def load_cwl_workflow(cwl_file_path) -> dict:
     with open(cwl_file_path, 'r') as file:
@@ -58,12 +59,12 @@ def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_pr
 
     run_id = 'abc'
     file_kv_path = '/home/typingliu/temp/hara_kv_db.json'
-    step_to_run = 'writeMessage';
-    is_final_step = False;
-    is_separate_mode = False;
-    # step_to_run = 'countWords';
-    # is_final_step = True;
+    # step_to_run = 'writeMessage';
+    # is_final_step = False;
     # is_separate_mode = True;
+    step_to_run = 'countWords';
+    is_final_step = True;
+    is_separate_mode = True;
 
     constants.init_hara_context(step_to_run, run_id, is_final_step, is_separate_mode, file_kv_path)
 
@@ -82,7 +83,13 @@ def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_pr
         return out
 
 
+
+
+
 if __name__ == "__main__":
+    cwl_logger = cwl_log.get_cwl_logger()
+    cwl_logger.info('start')
+
     # Path to your CWL file
     # cwl_file_path = "/home/typingliu/workspace/tpy/airflow21/airflow/airflow/hara_bin/cwl_tools/echo.cwl.yaml"
     cwl_file_path = "rw_example/hara_workflow.cwl.yaml"
@@ -95,3 +102,5 @@ if __name__ == "__main__":
 
     # Execute the CWL workflow
     execute_cwl(hara_cwl_engine.h_runtime_context, job_file_path, workflow_process=workflow_process)
+
+    cwl_logger.info('finished')

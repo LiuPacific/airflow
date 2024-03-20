@@ -66,7 +66,7 @@ from airflow.hara.cwl_tools.hara_engine import hara_command_line_tool, hara_work
     hara_workflow_job
 import pickle
 from airflow.hara.cwl_tools.hara_engine import constants
-
+from airflow.hara.cwl_tools.tools import cwl_log
 
 # refer to factory.WorkflowStatus
 class HaraWorkflowStatus(Exception):
@@ -361,6 +361,7 @@ class HaraCwlEngine:
                     #     )
                     #     return
 
+                    cwl_log.get_cwl_logger().info('jobname: '+job.name)
                     job.run(runtime_context)
                 else:
                     logger.error("Workflow cannot make any more progress.")
