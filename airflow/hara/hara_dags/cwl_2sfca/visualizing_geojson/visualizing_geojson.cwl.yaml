@@ -1,0 +1,28 @@
+cwlVersion: v1.2
+class: CommandLineTool
+
+
+hints:
+  DockerRequirement:
+    dockerPull: typingliu/visualizing_geojson:latest
+  NetworkAccess:
+    networkAccess: true
+
+inputs:
+  source_geojson_file_path:
+    type: File
+    inputBinding:
+      position: 1
+  column_name_to_show:
+    type: string
+    default: "Ai"
+    inputBinding:
+      position: 2
+
+outputs:
+  png_output:
+    type: File
+    outputBinding:
+      glob: "*.png"
+
+# cwltool --custom-net=host visualizing_geojson.cwl.yaml job.yaml

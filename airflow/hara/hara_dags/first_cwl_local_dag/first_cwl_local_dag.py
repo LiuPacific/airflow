@@ -24,8 +24,8 @@ with DAG(
 
     task1 = CwlLocalOperator(
         task_id='task_1',  # cwltool echo.cwl.yaml --message_text="hello typing"
-        cwl_path='/home/typingliu/workspace/tpy/airflow21/airflow/airflow/hara_bin/hara_dags/first_cwl_local_dag/echo.cwl.yaml',
-        job_path='/home/typingliu/workspace/tpy/airflow21/airflow/airflow/hara_bin/hara_dags/first_cwl_local_dag/echo.cwl.job.yaml'
+        cwl_path='/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/hara_dags/first_cwl_local_dag/echo.cwl.yaml',
+        job_path='/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/hara_dags/first_cwl_local_dag/echo.cwl.job.yaml'
     )
     task2 = BashOperator(
         task_id='task_2',

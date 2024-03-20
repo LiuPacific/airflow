@@ -45,7 +45,7 @@ def main():
     parser = cli_parser.get_parser()
     argcomplete.autocomplete(parser)
     # args = parser.parse_args()
-    args = parser.parse_args(['scheduler'])
+    args = parser.parse_args(['scheduler', '-p'])
     args.func(args)
 
 

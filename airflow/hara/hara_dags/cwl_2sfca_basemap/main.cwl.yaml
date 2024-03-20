@@ -1,0 +1,229 @@
+cwlVersion: v1.2
+class: Workflow
+id: main_workflow_2sfca
+hints:
+  ResourceRequirement:
+    ramMin: 2048
+    coresMin: 2
+label: main workflow for calculating 2sfca
+steps:
+  downloading_od:
+    run: ./S3_downloading/s3_downloading.cwl.yaml
+    in:
+      bucket_name: bucket_name_for_step_downloading_od
+      object_name: od_name_for_step_downloading_od
+    out:
+      - downloaded_file
+  downloading_zip_geo:
+    run: ./S3_downloading/s3_downloading.cwl.yaml
+    in:
+      bucket_name: bucket_name_for_step_downloading_zip_geo
+      object_name: zip_geo_name_for_step_downloading_zip_geo
+    out:
+      - downloaded_file
+
+
+
+
+  function_2sfca:
+    run: ./function_2sfca/function_2sfca.cwl.yaml
+    in:
+      travel_time_cost_data: downloading_od/downloaded_file
+      physician_data: downloading_zip_geo/downloaded_file
+      max_travel_cost: gauss_upper_limit_for_step_function_2sfca
+    out:
+      - geojson_output
+      - score_output
+  visualizing_2sfca_geojson:
+    run: ./cwl_visualizing_geojson_for_basemap/render_geojson_docker.cwl.yaml
+    in:
+      source_geojson_file_path: function_2sfca/geojson_output
+      column_name_to_show: column_name_to_show_for_step_visualizing_2sfca_geojson
+      output_png_file_name: output_png_file_name_for_step_visualizing_2sfca_geojson
+      output_boundingbox_file_name: output_boundingbox_file_name_for_step_visualizing_2sfca_geojson
+    out:
+      - png_output
+      - boundingbox_output
+      - lon_left
+      - lat_bottom
+      - lon_right
+      - lat_top
+  debug_print_float:
+    run: ./debug_node/debug_show_float.cwl.yaml
+    in:
+      input_float: visualizing_2sfca_geojson/lat_bottom
+    out: []
+
+#  rename_2sfca_png:
+#    run: ./rename_node/rename.cwl.yaml
+#    in:
+#      file_to_rename: visualizing_2sfca_geojson/png_output
+#      new_filename: new_filename_for_step_rename_2sfca_png
+#    out:
+#      - renamed_output
+
+
+
+
+
+  function_g2sfca:
+    run: ./function_2sfca/function_2sfca.cwl.yaml
+    in:
+      travel_time_cost_data: downloading_od/downloaded_file
+      physician_data: downloading_zip_geo/downloaded_file
+      max_travel_cost: gauss_upper_limit_for_step_function_g2sfca
+    out:
+      - geojson_output
+      - score_output
+  visualizing_g2sfca_geojson:
+    run: ./cwl_visualizing_geojson_for_basemap/render_geojson_docker.cwl.yaml
+    in:
+      source_geojson_file_path: function_g2sfca/geojson_output
+      column_name_to_show: column_name_to_show_for_step_visualizing_g2sfca_geojson
+      output_png_file_name: output_png_file_name_for_step_visualizing_g2sfca_geojson
+      output_boundingbox_file_name: output_boundingbox_file_name_for_step_visualizing_g2sfca_geojson
+    out:
+      - png_output
+      - boundingbox_output
+      - lon_left
+      - lat_bottom
+      - lon_right
+      - lat_top
+#  rename_g2sfca_png:
+#    run: ./rename_node/rename.cwl.yaml
+#    in:
+#      file_to_rename: visualizing_g2sfca_geojson/png_output
+#      new_filename: new_filename_for_step_rename_g2sfca_png
+#    out:
+#      - renamed_output
+
+
+  function_e2sfca:
+    run: ./function_e2sfca/function_e2sfca.cwl.yaml
+    in:
+      travel_time_cost_data: downloading_od/downloaded_file
+      physician_data: downloading_zip_geo/downloaded_file
+    out:
+      - geojson_output
+      - score_output
+  visualizing_e2sfca_geojson:
+    run: ./cwl_visualizing_geojson_for_basemap/render_geojson_docker.cwl.yaml
+    in:
+      source_geojson_file_path: function_e2sfca/geojson_output
+      column_name_to_show: column_name_to_show_for_step_visualizing_e2sfca_geojson
+      output_png_file_name: output_png_file_name_for_step_visualizing_e2sfca_geojson
+      output_boundingbox_file_name: output_boundingbox_file_name_for_step_visualizing_e2sfca_geojson
+    out:
+      - png_output
+      - boundingbox_output
+      - lon_left
+      - lat_bottom
+      - lon_right
+      - lat_top
+#  rename_e2sfca_png:
+#    run: ./rename_node/rename.cwl.yaml
+#    in:
+#      file_to_rename: visualizing_e2sfca_geojson/png_output
+#      new_filename: new_filename_for_step_rename_e2sfca_png
+#    out:
+#      - renamed_output
+
+
+
+
+inputs:
+  bucket_name_for_step_downloading_od: string
+  od_name_for_step_downloading_od: string
+  bucket_name_for_step_downloading_zip_geo: string
+  zip_geo_name_for_step_downloading_zip_geo: string
+
+  gauss_upper_limit_for_step_function_2sfca:
+    type: int
+    default: 0
+  column_name_to_show_for_step_visualizing_2sfca_geojson: string
+  output_png_file_name_for_step_visualizing_2sfca_geojson:
+    type: string
+    default: "2sfca.png"
+  output_boundingbox_file_name_for_step_visualizing_2sfca_geojson:
+    type: string
+    default: "boundingbox_2sfca.json"
+
+  gauss_upper_limit_for_step_function_g2sfca: int
+  column_name_to_show_for_step_visualizing_g2sfca_geojson: string
+  output_png_file_name_for_step_visualizing_g2sfca_geojson:
+    type: string
+    default: "g2sfca.png"
+  output_boundingbox_file_name_for_step_visualizing_g2sfca_geojson:
+    type: string
+    default: "boundingbox_g2sfca.json"
+
+
+  column_name_to_show_for_step_visualizing_e2sfca_geojson: string
+  output_png_file_name_for_step_visualizing_e2sfca_geojson:
+    type: string
+    default: "e2sfca.png"
+  output_boundingbox_file_name_for_step_visualizing_e2sfca_geojson:
+    type: string
+    default: "boundingbox_e2sfca.json"
+
+
+outputs:
+  function_2sfca_score:
+    type: File
+    outputSource: function_2sfca/score_output
+  function_2sfca_geodata:
+    type: File
+    outputSource: function_2sfca/geojson_output
+  visualizing_2sfca_geojson_png_output:
+    type: File
+    outputSource: visualizing_2sfca_geojson/png_output
+  visualizing_2sfca_geojson_boundingbox:
+    type: File
+    outputSource: visualizing_2sfca_geojson/boundingbox_output
+#  renamed_2sfca_png:
+#    type: File
+#    outputSource: rename_2sfca_png/renamed_output
+
+
+  function_g2sfca_score:
+    type: File
+    outputSource: function_g2sfca/score_output
+  function_g2sfca_geodata:
+    type: File
+    outputSource: function_g2sfca/geojson_output
+  visualizing_g2sfca_geojson_png_output:
+    type: File
+    outputSource: visualizing_g2sfca_geojson/png_output
+  visualizing_g2sfca_geojson_boundingbox:
+    type: File
+    outputSource: visualizing_g2sfca_geojson/boundingbox_output
+
+#  renamed_g2sfca_png:
+#    type: File
+#    outputSource: rename_g2sfca_png/renamed_output
+
+
+  function_e2sfca_score:
+    type: File
+    outputSource: function_e2sfca/score_output
+  function_e2sfca_geodata:
+    type: File
+    outputSource: function_e2sfca/geojson_output
+  visualizing_e2sfca_geojson_png_output:
+    type: File
+    outputSource: visualizing_e2sfca_geojson/png_output
+  visualizing_e2sfca_geojson_boundingbox:
+    type: File
+    outputSource: visualizing_e2sfca_geojson/boundingbox_output
+#  renamed_e2sfca_png:
+#    type: File
+#    outputSource: rename_e2sfca_png/renamed_output
+
+
+
+
+"$namespaces":
+  author: team
+  website_name: workflow-engine
+
+# cwltool --custom-net=host main.cwl.yaml job.yaml

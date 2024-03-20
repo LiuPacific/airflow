@@ -1,0 +1,13 @@
+bucket_name_for_step_downloading_od: "osu-geohealth"
+od_name_for_step_downloading_od: "ok_od_travel_3hour.csv"
+bucket_name_for_step_downloading_zip_geo: "osu-geohealth"
+zip_geo_name_for_step_downloading_zip_geo: "ok_zip_acc.geojson"
+
+column_name_to_show_for_step_visualizing_2sfca_geojson: "Ai"
+
+gauss_upper_limit_for_step_function_g2sfca: 60
+column_name_to_show_for_step_visualizing_g2sfca_geojson: "Ai"
+
+column_name_to_show_for_step_visualizing_e2sfca_geojson: "Ai"
+
+

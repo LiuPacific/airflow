@@ -1,0 +1,35 @@
+cwlVersion: v1.2
+class: CommandLineTool
+
+
+hints:
+  DockerRequirement:
+    dockerPull: typingliu/function_2sfca:latest
+  NetworkAccess:
+    networkAccess: true
+
+inputs:
+  travel_time_cost_data:
+    type: File
+    inputBinding:
+      position: 1
+  physician_data:
+    type: File
+    inputBinding:
+      position: 2
+  max_travel_cost:
+    type: int
+    inputBinding:
+      position: 3
+
+outputs:
+  geojson_output:
+    type: File
+    outputBinding:
+      glob: "*.geojson"
+  score_output:
+    type: File
+    outputBinding:
+      glob: "*.csv"
+
+# cwltool --custom-net=host function_2sfca.cwl.yaml job.yaml

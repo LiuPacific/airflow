@@ -5,8 +5,8 @@ from cwltool.executors import SingleJobExecutor
 from cwltool.load_tool import load_tool
 
 
-def load_cwl_workflow(cwl_file_path):
-    with open(cwl_file_path, 'r') as file:
+def load_cwl_workflow(main_cwl_file_path):
+    with open(main_cwl_file_path, 'r') as file:
         cwl_workflow_config_dict = yaml.safe_load(file)
     return cwl_workflow_config_dict
 
@@ -31,8 +31,8 @@ def execute_step(step_file_path, inputs):
     return output
 
 # Main execution logic
-cwl_file_path = 'path/to/your/workflow.cwl'
-cwl_workflow_config_dict = load_cwl_workflow(cwl_file_path)
+main_cwl_file_path = 'path/to/your/workflow.cwl'
+cwl_workflow_config_dict = load_cwl_workflow(main_cwl_file_path)
 command_line_tools_to_run = get_command_line_tools(cwl_workflow_config_dict)
 
 # Example: executing each step with predefined inputs

@@ -46,9 +46,10 @@ from cwltool.utils import (
 
 if TYPE_CHECKING:
     from cwltool.cwlprov.provenance_profile import ProvenanceProfile
-    from airflow.hara.cwl_tools.hara_engine.hara_workflow import HaraWorkflow, WorkflowStep
+    from airflow.hara.cwl_tools.hara_engine.hara_workflow import WorkflowStep
 
-from airflow.hara.cwl_tools.hara_engine import constants
+from airflow.hara.cwl_tools.config import constants
+from airflow.hara.cwl_tools.hara_engine.node_tool import node_manager
 
 
 class WorkflowJobStep:
@@ -400,15 +401,17 @@ def object_from_state(
             for src in connections:
                 ## hara changed: load state from third place. The current node have dependency on previous nodes' output, the information is stored in the third place out of the program
                 if constants.get_hara_context().is_separate_mode:
-                    workflowStateItem_pickled_base64 = constants.get_hara_context().kvdb.get(
-                        constants.get_hara_context().run_id + src)
-                    if workflowStateItem_pickled_base64 is None:
-                        raise WorkflowException("the dependency isn't sufficient to run the current node: " % (src))
-                    workflowStateItem_pickled = base64.b64decode(workflowStateItem_pickled_base64.encode("ascii"))
-                    workflowStateItem = pickle.loads(workflowStateItem_pickled)
-                    # state[inp["id"]] = workflowStateItem
-                    state[src] = workflowStateItem
-
+                    if state[src] is None:
+                        workflowStateItem_pickled_base64 = constants.get_hara_context().kvdb.get(
+                            constants.get_hara_context().run_id + src)
+                        if workflowStateItem_pickled_base64 is not None:
+                            # raise WorkflowException("the dependency isn't sufficient to run the current node: " % (src))
+                            workflowStateItem_pickled = base64.b64decode(
+                                workflowStateItem_pickled_base64.encode("ascii"))
+                            workflowStateItem = pickle.loads(workflowStateItem_pickled)
+                            # state[inp["id"]] = workflowStateItem
+                            state[src] = workflowStateItem
+                ## hara change ends
 
                 a_state = state.get(src, None)
                 if a_state is not None and (
@@ -496,6 +499,10 @@ class HaraWorkflowJob:
             self.prov_obj = workflow.provenance_object
             self.parent_wf = workflow.parent_wf
         self.steps = [WorkflowJobStep(s) for s in workflow.steps]
+        ## hara change starts:
+        _logger.info("set workflow step num")
+        node_manager.set_workflow_step_num(len(self.steps))
+        ## hara change ends;
         self.state: Dict[str, Optional[WorkflowStateItem]] = {}
         self.processStatus = ""
         self.did_callback = False
@@ -576,10 +583,12 @@ class HaraWorkflowJob:
                     if constants.get_hara_context().is_separate_mode:
                         workflowStateItem = WorkflowStateItem(i, jobout[iid], processStatus)
                         workflowStateItem_pickled = pickle.dumps(workflowStateItem)
-                        workflowStateItem_pickled_base64 = base64.b64encode(workflowStateItem_pickled).decode("ascii")
+                        workflowStateItem_pickled_base64 = base64.b64encode(workflowStateItem_pickled).decode(
+                            "ascii")
                         constants.get_hara_context().kvdb.set(constants.get_hara_context().run_id + iid,
                                                               workflowStateItem_pickled_base64)
                     else:
+                        ## hara change ends
                         self.state[iid] = WorkflowStateItem(i, jobout[iid], processStatus)
                 else:
                     _logger.error("[%s] Output is missing expected field %s", step.name, iid)
@@ -595,16 +604,31 @@ class HaraWorkflowJob:
         else:
             _logger.info("[%s] completed %s", step.name, processStatus)
 
+        ## hara change starts:
+        # origin
+        # step.completed = True
+        # change:
         step.completed = True
+        _logger.info("set step to be success and add completed num")
+        node_manager.set_task_info(step.name, 'success')
+        node_manager.add_node_completed_num()
+        ## hara change ends
+
         # Release the iterable related to this step to
         # reclaim memory.
         step.iterable = None
         self.made_progress = True
 
         ## hara changed: judge whether the current step is the last step
+
+        print("xxxx")
+        _logger.info("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+        _logger.info("[%s] completed. workflow %d/%d", step.name, node_manager.get_node_completed_num(),
+                     len(self.steps))
         if constants.get_hara_context().is_separate_mode:
-            if constants.get_hara_context().is_final_step:
+            if node_manager.get_node_completed_num() == len(self.steps):
                 self.do_output_callback(final_output_callback)
+                _logger.info("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx do_output_callback")
 
         else:  # In origin mode, if it's the last step, it will output using completed mechanism, which is to count the successful nodes.
             completed = sum(1 for s in self.steps if s.completed)

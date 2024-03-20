@@ -1,38 +1,12 @@
-import os
-from typing import Any, Dict, Optional, Union, Tuple, MutableMapping
+from typing import Any, MutableMapping
 from ruamel.yaml.comments import CommentedMap
-import cwltool.workflow
-from cwltool import load_tool
-from cwltool.context import LoadingContext, RuntimeContext
-from cwltool.errors import WorkflowException
-from cwltool.executors import JobExecutor, SingleJobExecutor
-from cwltool.process import Process
-from cwltool.utils import CWLObjectType
-from cwltool import workflow
-from cwltool.context import getdefault
-from cwltool.cuda import cuda_version_and_device_count
-from cwltool.cwlprov.provenance_profile import ProvenanceProfile
-from cwltool.errors import WorkflowException
-from cwltool.job import JobBase
-from cwltool.loghandler import _logger
-from cwltool.mutation import MutationManager
-from cwltool.process import Process, cleanIntermediate, relocateOutputs
-from cwltool.task_queue import TaskQueue
-from cwltool.update import ORIGINAL_CWLVERSION
-from cwltool.utils import CWLObjectType, JobsType
-from cwltool import command_line_tool
-import logging
-from typing import Optional, Union
+from cwltool.context import LoadingContext
+from cwltool.executors import JobExecutor
 import datetime
-import functools
 import logging
-import math
 import os
 import threading
-from abc import ABCMeta, abstractmethod
-from threading import Lock
 from typing import (
-    Dict,
     Iterable,
     List,
     MutableSequence,
@@ -43,29 +17,25 @@ from typing import (
     cast,
 )
 
-import psutil
-from mypy_extensions import mypyc_attr
 from schema_salad.exceptions import ValidationException
 from schema_salad.sourceline import SourceLine
 
-from cwltool.command_line_tool import CallbackJob, ExpressionJob
 from cwltool.context import RuntimeContext, getdefault
-from cwltool.cuda import cuda_version_and_device_count
 from cwltool.cwlprov.provenance_profile import ProvenanceProfile
 from cwltool.errors import WorkflowException
 from cwltool.job import JobBase
 from cwltool.loghandler import _logger
 from cwltool.mutation import MutationManager
 from cwltool.process import Process, cleanIntermediate, relocateOutputs
-from cwltool.task_queue import TaskQueue
 from cwltool.update import ORIGINAL_CWLVERSION
-from cwltool.utils import CWLObjectType, JobsType
+from cwltool.utils import CWLObjectType
 # from cwltool.workflow import Workflow
-from airflow.hara.cwl_tools.hara_engine import cmdlinetool_runner
-from airflow.hara.cwl_tools.hara_engine import hara_command_line_tool, hara_workflow, hara_load_tool, hara_job, \
+from airflow.hara.cwl_tools.hara_engine import hara_command_line_tool, hara_workflow, hara_load_tool, \
     hara_workflow_job
-import pickle
-from airflow.hara.cwl_tools.hara_engine import constants
+from airflow.hara.cwl_tools.config import constants
+from airflow.hara.cwl_tools.tools import cwl_log
+from airflow.hara.cwl_tools.hara_engine.node_tool import node_manager
+from tests.system.providers.cncf.kubernetes.example_kubernetes_decorator import print_pattern
 
 
 # refer to factory.WorkflowStatus
@@ -160,7 +130,7 @@ class HaraCwlEngine:
         # return HaraCallable(load, self)
         return workflow_process
 
-    # refer to /home/typingliu/.conda/envs/airflow21_dev2/lib/python3.8/site-packages/cwltool/executors.py
+    # refer to /cwltool/executors.py
     # class JobExecutor(metaclass=ABCMeta):     def execute(
     def hara_execute(
         self,
@@ -238,7 +208,7 @@ class HaraCwlEngine:
 
         ## hara changed: when running in whole-workflow mode, it should be true, since the last node is a final node.
         if (
-            constants.get_hara_context().is_separate_mode and constants.get_hara_context().is_final_step
+            constants.get_hara_context().is_separate_mode and (node_manager.get_node_completed_num() == node_manager.get_workflow_step_num())
         ) or (
             not constants.get_hara_context().is_separate_mode
         ):
@@ -319,10 +289,7 @@ class HaraCwlEngine:
             )
             process.parent_wf = process.provenance_object
 
-        ## hara changed
-        # jobiter = process.job(job_order_object, self.output_callback, runtime_context)
         jobiter = process.job(job_order_object, self.output_callback, runtime_context)
-        ## hara end
         # cwltool.workflow.Workflow
         try:
             for job in jobiter:
@@ -361,6 +328,7 @@ class HaraCwlEngine:
                     #     )
                     #     return
 
+                    cwl_log.get_cwl_logger().info('jobname: '+job.name)
                     job.run(runtime_context)
                 else:
                     logger.error("Workflow cannot make any more progress.")
@@ -378,3 +346,6 @@ class HaraCwlEngine:
 # job can be WorkflowJob and CommandLineJob
 def serialize_job(job, runtime_context: RuntimeContext):
     pass;
+
+
+

@@ -1,0 +1,8 @@
+travel_time_cost_data:
+  class: File
+  path: "../.data/ok_od_travel_3hour.csv"
+zip_physician_file_path:
+  class: File
+  path: "../.data/ok_zip_acc.geojson"
+max_travel_cost: 0
+

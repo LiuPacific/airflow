@@ -1,0 +1,4 @@
+source_geojson_file_path:
+  class: File
+  path: "../gauss_result.geojson"
+gauss_upper_limit: 0

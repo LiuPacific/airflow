@@ -350,8 +350,10 @@ def task_run(args, dag=None):
                 f"You provided the option {unsupported_flags}. "
                 "Delete it to execute the command."
             )
-    if dag and args.pickle:
-        raise AirflowException("You cannot use the --pickle option when using DAG.cli() method.")
+    # hara change starts:  Allow --pickle
+    # if dag and args.pickle:
+    #     raise AirflowException("You cannot use the --pickle option when using DAG.cli() method.")
+    # hara change ends
     if args.cfg_path:
         with open(args.cfg_path) as conf_file:
             conf_dict = json.load(conf_file)
@@ -372,11 +374,22 @@ def task_run(args, dag=None):
 
     get_listener_manager().hook.on_starting(component=TaskCommandMarker())
 
+
+    # TODO: hara to change the logic here
     if args.pickle:
         print(f"Loading pickle id: {args.pickle}")
         dag = get_dag_by_pickle(args.pickle)
     elif not dag:
-        dag = get_dag(args.subdir, args.dag_id)
+        # hara change starts: get pickled dag to execute, instead of getting dag from dag_dir.
+        # dag = get_dag(args.subdir, args.dag_id)
+
+        from airflow.utils.cli import get_dag_by_hara_serialized_dag, get_pickled_dag_by_dag_id
+        dag = get_dag_by_hara_serialized_dag(args.dag_id)
+        if dag is None:
+            dag = get_pickled_dag_by_dag_id(args.dag_id)
+        if dag is None:
+            dag = get_dag(args.subdir, args.dag_id) # hara: dag from normal file is hang up here.
+        # hara change ends;
     else:
         # Use DAG from parameter
         pass

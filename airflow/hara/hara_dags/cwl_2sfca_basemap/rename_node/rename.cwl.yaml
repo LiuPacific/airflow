@@ -1,0 +1,23 @@
+cwlVersion: v1.0
+class: CommandLineTool
+
+baseCommand: [mv]
+
+inputs:
+  file_to_rename:
+    type: File
+    inputBinding:
+      position: 1
+  new_filename:
+    type: string
+    default: "renamed_output.txt"
+    inputBinding:
+      position: 2
+
+outputs:
+  renamed_output:
+    type: File
+    outputBinding:
+      glob: $(inputs.new_filename)
+
+

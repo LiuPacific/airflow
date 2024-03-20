@@ -1,0 +1,451 @@
+{
+    "workflow_name": "hara_2sfca_rename",
+    "main_cwl": {
+        "cwlVersion": "v1.2",
+        "class": "Workflow",
+        "id": "main_workflow_2sfca",
+        "hints": {
+            "ResourceRequirement": {
+                "ramMin": 2048,
+                "coresMin": 2
+            }
+        },
+        "label": "main workflow for calculating 2sfca",
+        "steps": {
+            "downloading_od": {
+                "run": "s3_downloading.cwl.yaml",
+                "in": {
+                    "bucket_name": "bucket_name_for_step_downloading_od",
+                    "object_name": "od_name_for_step_downloading_od"
+                },
+                "out": [
+                    "downloaded_file"
+                ]
+            },
+            "downloading_zip_geo": {
+                "run": "s3_downloading.cwl.yaml",
+                "in": {
+                    "bucket_name": "bucket_name_for_step_downloading_zip_geo",
+                    "object_name": "zip_geo_name_for_step_downloading_zip_geo"
+                },
+                "out": [
+                    "downloaded_file"
+                ]
+            },
+            "function_2sfca": {
+                "run": "function_2sfca.cwl.yaml",
+                "in": {
+                    "travel_time_cost_data": "downloading_od/downloaded_file",
+                    "physician_data": "downloading_zip_geo/downloaded_file",
+                    "max_travel_cost": "gauss_upper_limit_for_step_function_2sfca"
+                },
+                "out": [
+                    "geojson_output",
+                    "score_output"
+                ]
+            },
+            "visualizing_2sfca_geojson": {
+                "run": "render_geojson_docker.cwl.yaml",
+                "in": {
+                    "source_geojson_file_path": "function_2sfca/geojson_output",
+                    "column_name_to_show": "column_name_to_show_for_step_visualizing_2sfca_geojson",
+                    "output_png_file_name": "output_png_file_name_for_step_visualizing_2sfca_geojson",
+                    "output_boundingbox_file_name": "output_boundingbox_file_name_for_step_visualizing_2sfca_geojson"
+                },
+                "out": [
+                    "png_output",
+                    "boundingbox_output",
+                    "lon_left",
+                    "lat_bottom",
+                    "lon_right",
+                    "lat_top"
+                ]
+            },
+            "debug_print_float": {
+                "run": "debug_show_float.cwl.yaml",
+                "in": {
+                    "input_float": "visualizing_2sfca_geojson/lat_bottom"
+                },
+                "out": []
+            },
+            "function_g2sfca": {
+                "run": "function_2sfca.cwl.yaml",
+                "in": {
+                    "travel_time_cost_data": "downloading_od/downloaded_file",
+                    "physician_data": "downloading_zip_geo/downloaded_file",
+                    "max_travel_cost": "gauss_upper_limit_for_step_function_g2sfca"
+                },
+                "out": [
+                    "geojson_output",
+                    "score_output"
+                ]
+            },
+            "visualizing_g2sfca_geojson": {
+                "run": "render_geojson_docker.cwl.yaml",
+                "in": {
+                    "source_geojson_file_path": "function_g2sfca/geojson_output",
+                    "column_name_to_show": "column_name_to_show_for_step_visualizing_g2sfca_geojson",
+                    "output_png_file_name": "output_png_file_name_for_step_visualizing_g2sfca_geojson",
+                    "output_boundingbox_file_name": "output_boundingbox_file_name_for_step_visualizing_g2sfca_geojson"
+                },
+                "out": [
+                    "png_output",
+                    "boundingbox_output",
+                    "lon_left",
+                    "lat_bottom",
+                    "lon_right",
+                    "lat_top"
+                ]
+            },
+            "function_e2sfca": {
+                "run": "function_e2sfca.cwl.yaml",
+                "in": {
+                    "travel_time_cost_data": "downloading_od/downloaded_file",
+                    "physician_data": "downloading_zip_geo/downloaded_file"
+                },
+                "out": [
+                    "geojson_output",
+                    "score_output"
+                ]
+            },
+            "visualizing_e2sfca_geojson": {
+                "run": "render_geojson_docker.cwl.yaml",
+                "in": {
+                    "source_geojson_file_path": "function_e2sfca/geojson_output",
+                    "column_name_to_show": "column_name_to_show_for_step_visualizing_e2sfca_geojson",
+                    "output_png_file_name": "output_png_file_name_for_step_visualizing_e2sfca_geojson",
+                    "output_boundingbox_file_name": "output_boundingbox_file_name_for_step_visualizing_e2sfca_geojson"
+                },
+                "out": [
+                    "png_output",
+                    "boundingbox_output",
+                    "lon_left",
+                    "lat_bottom",
+                    "lon_right",
+                    "lat_top"
+                ]
+            }
+        },
+        "inputs": {
+            "bucket_name_for_step_downloading_od": "string",
+            "od_name_for_step_downloading_od": "string",
+            "bucket_name_for_step_downloading_zip_geo": "string",
+            "zip_geo_name_for_step_downloading_zip_geo": "string",
+            "gauss_upper_limit_for_step_function_2sfca": {
+                "type": "int",
+                "default": 0
+            },
+            "column_name_to_show_for_step_visualizing_2sfca_geojson": "string",
+            "output_png_file_name_for_step_visualizing_2sfca_geojson": {
+                "type": "string",
+                "default": "2sfca.png"
+            },
+            "output_boundingbox_file_name_for_step_visualizing_2sfca_geojson": {
+                "type": "string",
+                "default": "boundingbox_2sfca.json"
+            },
+            "gauss_upper_limit_for_step_function_g2sfca": "int",
+            "column_name_to_show_for_step_visualizing_g2sfca_geojson": "string",
+            "output_png_file_name_for_step_visualizing_g2sfca_geojson": {
+                "type": "string",
+                "default": "g2sfca.png"
+            },
+            "output_boundingbox_file_name_for_step_visualizing_g2sfca_geojson": {
+                "type": "string",
+                "default": "boundingbox_g2sfca.json"
+            },
+            "column_name_to_show_for_step_visualizing_e2sfca_geojson": "string",
+            "output_png_file_name_for_step_visualizing_e2sfca_geojson": {
+                "type": "string",
+                "default": "e2sfca.png"
+            },
+            "output_boundingbox_file_name_for_step_visualizing_e2sfca_geojson": {
+                "type": "string",
+                "default": "boundingbox_e2sfca.json"
+            }
+        },
+        "outputs": {
+            "function_2sfca_score": {
+                "type": "File",
+                "outputSource": "function_2sfca/score_output"
+            },
+            "function_2sfca_geodata": {
+                "type": "File",
+                "outputSource": "function_2sfca/geojson_output"
+            },
+            "visualizing_2sfca_geojson_png_output": {
+                "type": "File",
+                "outputSource": "visualizing_2sfca_geojson/png_output"
+            },
+            "visualizing_2sfca_geojson_boundingbox": {
+                "type": "File",
+                "outputSource": "visualizing_2sfca_geojson/boundingbox_output"
+            },
+            "function_g2sfca_score": {
+                "type": "File",
+                "outputSource": "function_g2sfca/score_output"
+            },
+            "function_g2sfca_geodata": {
+                "type": "File",
+                "outputSource": "function_g2sfca/geojson_output"
+            },
+            "visualizing_g2sfca_geojson_png_output": {
+                "type": "File",
+                "outputSource": "visualizing_g2sfca_geojson/png_output"
+            },
+            "visualizing_g2sfca_geojson_boundingbox": {
+                "type": "File",
+                "outputSource": "visualizing_g2sfca_geojson/boundingbox_output"
+            },
+            "function_e2sfca_score": {
+                "type": "File",
+                "outputSource": "function_e2sfca/score_output"
+            },
+            "function_e2sfca_geodata": {
+                "type": "File",
+                "outputSource": "function_e2sfca/geojson_output"
+            },
+            "visualizing_e2sfca_geojson_png_output": {
+                "type": "File",
+                "outputSource": "visualizing_e2sfca_geojson/png_output"
+            },
+            "visualizing_e2sfca_geojson_boundingbox": {
+                "type": "File",
+                "outputSource": "visualizing_e2sfca_geojson/boundingbox_output"
+            }
+        },
+        "$namespaces": {
+            "author": "team",
+            "website_name": "workflow-engine"
+        }
+    },
+    "command_line_tools": {
+        "s3_downloading.cwl.yaml": {
+            "cwlVersion": "v1.2",
+            "class": "CommandLineTool",
+            "hints": {
+                "DockerRequirement": {
+                    "dockerPull": "typingliu/s3_downloading:latest"
+                },
+                "NetworkAccess": {
+                    "networkAccess": true
+                }
+            },
+            "inputs": {
+                "bucket_name": {
+                    "type": "string",
+                    "inputBinding": {
+                        "position": 1
+                    }
+                },
+                "object_name": {
+                    "type": "string",
+                    "inputBinding": {
+                        "position": 2
+                    }
+                }
+            },
+            "outputs": {
+                "downloaded_file": {
+                    "type": "File",
+                    "outputBinding": {
+                        "glob": "*"
+                    }
+                }
+            }
+        },
+        "function_2sfca.cwl.yaml": {
+            "cwlVersion": "v1.2",
+            "class": "CommandLineTool",
+            "hints": {
+                "DockerRequirement": {
+                    "dockerPull": "typingliu/function_2sfca:latest"
+                },
+                "NetworkAccess": {
+                    "networkAccess": true
+                }
+            },
+            "inputs": {
+                "travel_time_cost_data": {
+                    "type": "File",
+                    "inputBinding": {
+                        "position": 1
+                    }
+                },
+                "physician_data": {
+                    "type": "File",
+                    "inputBinding": {
+                        "position": 2
+                    }
+                },
+                "max_travel_cost": {
+                    "type": "int",
+                    "inputBinding": {
+                        "position": 3
+                    }
+                }
+            },
+            "outputs": {
+                "geojson_output": {
+                    "type": "File",
+                    "outputBinding": {
+                        "glob": "*.geojson"
+                    }
+                },
+                "score_output": {
+                    "type": "File",
+                    "outputBinding": {
+                        "glob": "*.csv"
+                    }
+                }
+            }
+        },
+        "function_e2sfca.cwl.yaml": {
+            "cwlVersion": "v1.2",
+            "class": "CommandLineTool",
+            "hints": {
+                "DockerRequirement": {
+                    "dockerPull": "typingliu/function_e2sfca:latest"
+                },
+                "NetworkAccess": {
+                    "networkAccess": true
+                }
+            },
+            "inputs": {
+                "travel_time_cost_data": {
+                    "type": "File",
+                    "inputBinding": {
+                        "position": 1
+                    }
+                },
+                "physician_data": {
+                    "type": "File",
+                    "inputBinding": {
+                        "position": 2
+                    }
+                }
+            },
+            "outputs": {
+                "geojson_output": {
+                    "type": "File",
+                    "outputBinding": {
+                        "glob": "*.geojson"
+                    }
+                },
+                "score_output": {
+                    "type": "File",
+                    "outputBinding": {
+                        "glob": "*.csv"
+                    }
+                }
+            }
+        },
+        "render_geojson_docker.cwl.yaml": {
+            "cwlVersion": "v1.2",
+            "class": "CommandLineTool",
+            "hints": {
+                "DockerRequirement": {
+                    "dockerPull": "typingliu/visualizing_geojson_for_basemap:latest"
+                },
+                "NetworkAccess": {
+                    "networkAccess": true
+                }
+            },
+            "inputs": {
+                "source_geojson_file_path": {
+                    "type": "File",
+                    "inputBinding": {
+                        "position": 1
+                    }
+                },
+                "column_name_to_show": {
+                    "type": "string",
+                    "default": "Ai",
+                    "inputBinding": {
+                        "position": 2
+                    }
+                },
+                "output_png_file_name": {
+                    "type": "string",
+                    "default": "default.png",
+                    "inputBinding": {
+                        "position": 4
+                    }
+                },
+                "output_boundingbox_file_name": {
+                    "type": "string",
+                    "default": "boundingbox_default.json",
+                    "inputBinding": {
+                        "position": 5
+                    }
+                }
+            },
+            "stdout": "output.txt",
+            "outputs": {
+                "png_output": {
+                    "type": "File",
+                    "outputBinding": {
+                        "glob": "*.png",
+                        "outputEval": "${self[0].basename=inputs.output_png_file_name; return self;}"
+                    }
+                },
+                "boundingbox_output": {
+                    "type": "File",
+                    "outputBinding": {
+                        "glob": "boundingbox.json",
+                        "outputEval": "${self[0].basename=inputs.output_boundingbox_file_name; return self;}"
+                    }
+                },
+                "lon_left": {
+                    "type": "float",
+                    "outputBinding": {
+                        "loadContents": true,
+                        "glob": "output.txt",
+                        "outputEval": "$(parseFloat(self[0].contents.match(/lon_left=([0-9.e+-]+)/)[1]))"
+                    }
+                },
+                "lat_bottom": {
+                    "type": "float",
+                    "outputBinding": {
+                        "loadContents": true,
+                        "glob": "output.txt",
+                        "outputEval": "$(parseFloat(self[0].contents.match(/lat_bottom=([0-9.e+-]+)/)[1]))"
+                    }
+                },
+                "lon_right": {
+                    "type": "float",
+                    "outputBinding": {
+                        "loadContents": true,
+                        "glob": "output.txt",
+                        "outputEval": "$(parseFloat(self[0].contents.match(/lon_right=([0-9.e+-]+)/)[1]))"
+                    }
+                },
+                "lat_top": {
+                    "type": "float",
+                    "outputBinding": {
+                        "loadContents": true,
+                        "glob": "output.txt",
+                        "outputEval": "$(parseFloat(self[0].contents.match(/lat_top=([0-9.e+-]+)/)[1]))"
+                    }
+                }
+            },
+            "requirements": {
+                "InlineJavascriptRequirement": {}
+            }
+        },
+        "debug_show_float.cwl.yaml":{
+            "cwlVersion": "v1.2",
+            "class": "CommandLineTool",
+            "baseCommand": "echo",
+            "inputs": {
+                "input_float": {
+                    "type": "float",
+                    "inputBinding": {
+                        "position": 1
+                    }
+                }
+            },
+            "outputs": []
+        }
+    }
+}

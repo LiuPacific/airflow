@@ -2583,7 +2583,10 @@ class Airflow(AirflowBaseView):
     @provide_session
     def grid(self, dag_id, session=None):
         """Get Dag's grid view."""
-        dag = get_airflow_app().dag_bag.get_dag(dag_id, session=session)
+        # hara change starts: get dag object from hara_serialized_dag in grid
+        # dag = get_airflow_app().dag_bag.get_dag(dag_id, session=session)
+        dag = get_airflow_app().dag_bag.get_hara_serialized_dag(dag_id, session=session)
+        # hara change ends
         dag_model = DagModel.get_dagmodel(dag_id, session=session)
         if not dag:
             flash(f'DAG "{dag_id}" seems to be missing from DagBag.', "error")
@@ -3463,7 +3466,10 @@ class Airflow(AirflowBaseView):
     def task_instances(self):
         """Shows task instances."""
         dag_id = request.args.get("dag_id")
-        dag = get_airflow_app().dag_bag.get_dag(dag_id)
+        # hara change starts: view/task_instance get dag from hara_serizlized_dag and pickle_dag
+        # dag = get_airflow_app().dag_bag.get_dag(dag_id)
+        dag = get_airflow_app().dag_bag.get_hara_serialized_dag(dag_id)
+        # hara change ends
 
         dttm = request.args.get("execution_date")
         if dttm:

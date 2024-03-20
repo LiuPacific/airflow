@@ -950,6 +950,12 @@ def _job_popen(
         if stderr_path is not None:
             stderr = open(stderr_path, "wb")
 
+        ## hara changed
+        _logger.warning('sys.stderr: %s', sys.stderr)
+        _logger.warning('stdin: %s', stdin)
+        _logger.warning('stdout: %s', stdout)
+        _logger.warning('stderr: %s', stderr)
+        ## hara end
         sproc = subprocess.Popen(
             commands,
             shell=False,  # nosec

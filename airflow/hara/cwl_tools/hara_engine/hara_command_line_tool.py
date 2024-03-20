@@ -49,7 +49,7 @@ from cwltool.builder import (
 )
 from cwltool.context import LoadingContext, RuntimeContext, getdefault
 from cwltool.context import LoadingContext, getdefault
-from cwltool.docker import DockerCommandLineJob, PodmanCommandLineJob
+from cwltool.docker import PodmanCommandLineJob # DockerCommandLineJob
 from cwltool.errors import UnsupportedRequirement, WorkflowException
 from cwltool.flatten import flatten
 from cwltool.job import CommandLineJob, JobBase
@@ -86,8 +86,8 @@ from cwltool.utils import (
     visit_class,
 )
 
-from airflow.hara.cwl_tools.hara_engine.hara_job import  Hara_CommandLineJob
-
+from airflow.hara.cwl_tools.hara_engine.hara_job import Hara_CommandLineJob
+from airflow.hara.cwl_tools.hara_engine.hara_docker_job import HaraDockerCommandLineJob
 
 if TYPE_CHECKING:
     from cwltool.cwlprov.provenance_profile import (
@@ -307,7 +307,7 @@ def revmap_file(builder: Builder, outdir: str, f: CWLObjectType) -> Optional[CWL
             or path.startswith(builder.outdir + "/")
         ):
             joined_path = builder.fs_access.join(
-                outdir, urllib.parse.quote(path[len(builder.outdir) + 1 :])
+                outdir, urllib.parse.quote(path[len(builder.outdir) + 1:])
             )
             f["location"] = joined_path
         else:
@@ -406,7 +406,7 @@ class ParameterOutputWorkflowException(WorkflowException):
             "Error collecting output for parameter '%s': %s"
             % (shortname(cast(str, port["id"])), msg),
             kwargs,
-            )
+        )
 
 
 @mypyc_attr(allow_interpreted_subclasses=True)
@@ -471,7 +471,10 @@ class HaraCommandLineTool(Process):
                         )
             if runtimeContext.podman:
                 return PodmanCommandLineJob
-            return DockerCommandLineJob
+            # hara change starts:
+            # return DockerCommandLineJob
+            return HaraDockerCommandLineJob
+            # hara change ends
         if dockerRequired:
             raise UnsupportedRequirement(
                 "--no-container, but this CommandLineTool has "
@@ -502,7 +505,7 @@ class HaraCommandLineTool(Process):
                     os.path.join(outdir, basename),
                     ("Writable" if fn.get("writable") else "") + cast(str, fn["class"]),
                     False,
-                    )
+                )
         for sf in cast(List[CWLObjectType], fn.get("secondaryFiles", [])):
             self.updatePathmap(outdir, pathmap, sf)
         for ls in cast(List[CWLObjectType], fn.get("listing", [])):
@@ -788,7 +791,7 @@ class HaraCommandLineTool(Process):
                     cast(Optional[str], entry.get("dirname")) or builder.outdir,
                     cast(PathMapper, builder.pathmapper),
                     entry,
-                    )
+                )
                 if "listing" in entry:
 
                     def remove_dirname(d: CWLObjectType) -> None:
@@ -807,7 +810,7 @@ class HaraCommandLineTool(Process):
                 partial(check_adjust, self.path_check_mode.value, builder),
             )
 
-    #CommandLineTool.job()
+    # CommandLineTool.job()
     def job(
         self,
         job_order: CWLObjectType,
@@ -820,8 +823,9 @@ class HaraCommandLineTool(Process):
         jobname = uniquename(runtimeContext.name or shortname(self.tool.get("id", "job")))
 
         # hara changed: outdir of each cmd node
-        runtimeContext.outdir = '/home/typingliu/temp/tmp_outdir/'+jobname+'/'
-
+        # runtimeContext.outdir = '/home/typingliu/temp/tmp_outdir/'+jobname+'/'
+        runtimeContext.outdir = os.path.join(runtimeContext.tmpdir_prefix, jobname)
+        # hara change ends
         if runtimeContext.cachedir and enableReuse:
             cachecontext = runtimeContext.copy()
             cachecontext.outdir = "/out"
@@ -880,7 +884,7 @@ class HaraCommandLineTool(Process):
 
             def remove_prefix(s: str, prefix: str) -> str:
                 # replace with str.removeprefix when Python 3.9+
-                return s[len(prefix) :] if s.startswith(prefix) else s
+                return s[len(prefix):] if s.startswith(prefix) else s
 
             for location, fobj in cachebuilder.pathmapper.items():
                 if fobj.type == "File":
@@ -1329,7 +1333,7 @@ class HaraCommandLineTool(Process):
 
                     for gb in globpatterns:
                         if gb.startswith(builder.outdir):
-                            gb = gb[len(builder.outdir) + 1 :]
+                            gb = gb[len(builder.outdir) + 1:]
                         elif gb == ".":
                             gb = outdir
                         elif gb.startswith("/"):
@@ -1346,7 +1350,7 @@ class HaraCommandLineTool(Process):
                                         "location": g,
                                         "path": fs_access.join(
                                             builder.outdir,
-                                            urllib.parse.unquote(g[len(prefix[0]) + 1 :]),
+                                            urllib.parse.unquote(g[len(prefix[0]) + 1:]),
                                         ),
                                         "basename": decoded_basename,
                                         "nameroot": os.path.splitext(decoded_basename)[0],
@@ -1428,7 +1432,7 @@ class HaraCommandLineTool(Process):
                     for primary in aslist(result):
                         if isinstance(primary, MutableMapping):
                             primary.setdefault("secondaryFiles", [])
-                            pathprefix = primary["path"][0 : primary["path"].rindex(os.sep) + 1]
+                            pathprefix = primary["path"][0: primary["path"].rindex(os.sep) + 1]
                             for sf in aslist(schema["secondaryFiles"]):
                                 if "required" in sf:
                                     with SourceLine(
