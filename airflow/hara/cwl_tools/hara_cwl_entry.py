@@ -59,6 +59,9 @@ def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_pr
     # runtime_context.tmpdir = '/home/typingliu/temp/tmpdir/'
     runtime_context.stagedir = stagedir
     runtime_context.outdir = outdir
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+    runtime_context.default_stderr = open(os.path.join(outdir, 'error.log'), 'w')
 
     constants.init_hara_context(step_to_run, run_id, is_final_step, is_separate_mode, file_kv_path)
 
