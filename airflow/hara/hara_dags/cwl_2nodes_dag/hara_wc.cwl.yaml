@@ -1,0 +1,19 @@
+cwlVersion: v1.2
+class: CommandLineTool
+baseCommand: wc
+arguments: ["-w"]
+inputs:
+  infile:
+    type: File
+    inputBinding:
+      position: 1
+outputs:
+  wordcount_result:
+    type: File
+    outputBinding:
+      glob: wordcount_result.txt
+stdout: wordcount_result.txt
+#outputs:
+#  wordcount_result:
+#    type: stdout
+#stdout: wordcount_result.txt

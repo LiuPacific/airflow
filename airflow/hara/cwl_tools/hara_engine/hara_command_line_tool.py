@@ -820,7 +820,8 @@ class HaraCommandLineTool(Process):
         jobname = uniquename(runtimeContext.name or shortname(self.tool.get("id", "job")))
 
         # hara changed: outdir of each cmd node
-        runtimeContext.outdir = '/home/typingliu/temp/tmp_outdir/'+jobname+'/'
+        # runtimeContext.outdir = '/home/typingliu/temp/tmp_outdir/'+jobname+'/'
+        runtimeContext.outdir = os.path.join(runtimeContext.tmpdir_prefix,jobname)
 
         if runtimeContext.cachedir and enableReuse:
             cachecontext = runtimeContext.copy()

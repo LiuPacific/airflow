@@ -29,6 +29,8 @@ from airflow.models.baseoperator import BaseOperator
 from airflow.utils.context import Context
 from airflow.utils.operator_helpers import KeywordParameters
 
+import os
+
 
 class CwlLocalOperator(BaseOperator):
     """
@@ -83,26 +85,18 @@ class CwlLocalOperator(BaseOperator):
         cwl_file_path: str,
         cwl_step_to_run: str,
         is_final_step: bool,
-        file_kv_path: str,
-        tmpdir_prefix: str,
-        tmp_outdir_prefix: str,
-        stagedir: str,
-        outdir: str,
         basedir: str,
         job_file_path: str,
+        cwl_work_path: str,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.cwl_file_path = cwl_file_path
         self.cwl_step_to_run = cwl_step_to_run
         self.is_final_step = is_final_step
-        self.file_kv_path = file_kv_path
-        self.tmpdir_prefix = tmpdir_prefix
-        self.tmp_outdir_prefix = tmp_outdir_prefix
-        self.stagedir = stagedir
-        self.outdir = outdir
         self.basedir = basedir
         self.job_file_path = job_file_path
+        self.cwl_work_path = cwl_work_path
 
     def execute(self, context: Context) -> Any:
         cwl_log.get_cwl_logger().info("start executing")
@@ -110,19 +104,34 @@ class CwlLocalOperator(BaseOperator):
         run_id = context['dag_run'].run_id
         path_safe_run_id = run_id.replace(':', '_').replace(' ', '_').replace('+', '_')
 
-        hara_cwl_engine = controller.HaraCwlEngine()
-        workflow_process = hara_cwl_engine.load_configuration(self.cwl_file_path)
+        cwl_file_path = self.cwl_file_path
+        job_file_path = self.job_file_path
 
-        return_value = hara_cwl_entry.execute_cwl(hara_cwl_engine.h_runtime_context, self.job_file_path,
+        tmpdir_prefix = os.path.join(self.cwl_work_path, run_id, 'tmp_outdir')
+        tmp_outdir_prefix = os.path.join(self.cwl_work_path, run_id)
+        # runtime_context.tmpdir = '/home/typingliu/temp/tmpdir/'
+        stagedir = os.path.join(self.cwl_work_path, run_id, 'stagedir/')
+        outdir = os.path.join(self.cwl_work_path, run_id, 'outdir/')
+
+        basedir = self.basedir
+        file_kv_path = os.path.join(self.cwl_work_path, run_id, 'hara_kv_db.json')
+        cwl_step_to_run = self.cwl_step_to_run;
+        is_final_step = self.is_final_step;
+
+
+        hara_cwl_engine = controller.HaraCwlEngine()
+        workflow_process = hara_cwl_engine.load_configuration(cwl_file_path)
+
+        return_value = hara_cwl_entry.execute_cwl(hara_cwl_engine.h_runtime_context, job_file_path,
                                                   workflow_process=workflow_process,
-                                                  tmpdir_prefix=self.tmpdir_prefix,
-                                                  tmp_outdir_prefix=self.tmp_outdir_prefix,
-                                                  stagedir=self.stagedir, outdir=self.outdir,
-                                                  basedir=self.basedir,
+                                                  tmpdir_prefix=tmpdir_prefix,
+                                                  tmp_outdir_prefix=tmp_outdir_prefix,
+                                                  stagedir=stagedir, outdir=outdir,
+                                                  basedir=basedir,
                                                   run_id=path_safe_run_id,
-                                                  file_kv_path=self.file_kv_path,
-                                                  step_to_run=self.cwl_step_to_run,
-                                                  is_final_step=self.is_final_step,
+                                                  file_kv_path=file_kv_path,
+                                                  step_to_run=cwl_step_to_run,
+                                                  is_final_step=is_final_step,
                                                   is_separate_mode=True
                                                   )
 
