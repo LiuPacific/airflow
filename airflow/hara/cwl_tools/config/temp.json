@@ -1,0 +1,126 @@
+{
+    "__version": 1,
+    "dag": {
+        "_description": "hara's first cwl operator dag",
+        "fileloc": "/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/dags_folder/cwl_1node_dag.py",
+        "dataset_triggers": [],
+        "default_args": {
+            "__var": {
+                "owner": "harada",
+                "retries": 5,
+                "retry_delay": {
+                    "__var": 120.0,
+                    "__type": "timedelta"
+                }
+            },
+            "__type": "dict"
+        },
+        "_task_group": {
+            "_group_id": null,
+            "prefix_group_id": true,
+            "tooltip": "",
+            "ui_color": "CornflowerBlue",
+            "ui_fgcolor": "#000",
+            "children": {
+                "task_0": [
+                    "operator",
+                    "task_0"
+                ],
+                "task_1": [
+                    "operator",
+                    "task_1"
+                ],
+                "task_2": [
+                    "operator",
+                    "task_2"
+                ]
+            },
+            "upstream_group_ids": [],
+            "downstream_group_ids": [],
+            "upstream_task_ids": [],
+            "downstream_task_ids": []
+        },
+        "schedule_interval": "@daily",
+        "start_date": 1704067200.0,
+        "edge_info": {},
+        "_dag_id": "cwl_1node_dag1",
+        "timezone": "UTC",
+        "_processor_dags_folder": "/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/dags_folder",
+        "tasks": [
+            {
+                "template_fields_renderers": {
+                    "bash_command": "bash",
+                    "env": "json"
+                },
+                "ui_color": "#f0ede4",
+                "task_id": "task_0",
+                "downstream_task_ids": [
+                    "task_1"
+                ],
+                "retry_delay": 120.0,
+                "owner": "harada",
+                "pool": "default_pool",
+                "template_ext": [
+                    ".sh",
+                    ".bash"
+                ],
+                "retries": 5,
+                "template_fields": [
+                    "bash_command",
+                    "env"
+                ],
+                "ui_fgcolor": "#000",
+                "_task_type": "BashOperator",
+                "_task_module": "airflow.operators.bash",
+                "_is_empty": false,
+                "bash_command": "echo \"hara Start\""
+            },
+            {
+                "template_fields_renderers": {},
+                "ui_color": "#fff",
+                "task_id": "task_1",
+                "downstream_task_ids": [
+                    "task_2"
+                ],
+                "retry_delay": 120.0,
+                "owner": "harada",
+                "pool": "default_pool",
+                "template_ext": [],
+                "retries": 5,
+                "template_fields": [],
+                "ui_fgcolor": "#000",
+                "_task_type": "CwlLocalOperator",
+                "_task_module": "airflow.hara.hara_operator.cwl_local_pyoperator",
+                "_is_empty": false
+            },
+            {
+                "template_fields_renderers": {
+                    "bash_command": "bash",
+                    "env": "json"
+                },
+                "ui_color": "#f0ede4",
+                "task_id": "task_2",
+                "downstream_task_ids": [],
+                "retry_delay": 120.0,
+                "owner": "harada",
+                "pool": "default_pool",
+                "template_ext": [
+                    ".sh",
+                    ".bash"
+                ],
+                "retries": 5,
+                "template_fields": [
+                    "bash_command",
+                    "env"
+                ],
+                "ui_fgcolor": "#000",
+                "_task_type": "BashOperator",
+                "_task_module": "airflow.operators.bash",
+                "_is_empty": false,
+                "bash_command": "echo \"Hara, Congratulations!\""
+            }
+        ],
+        "dag_dependencies": [],
+        "params": {}
+    }
+}

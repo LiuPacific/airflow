@@ -10,8 +10,8 @@ default_args = {
     'retry_delay': timedelta(minutes=2)
 }
 
-cwl_file_path = '/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/cwl_tools/rw_example/hara_workflow.cwl.yaml'
-job_file_path = '/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/cwl_tools/rw_example/hara_job.yaml'
+cwl_file_path = '/airflow/hara/cwl_tools/rw_example/hara_workflow.cwl.yaml'
+job_file_path = '/airflow/hara/cwl_tools/rw_example/hara_job.yaml'
 basedir = '/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/cwl_tools/rw_example'  # cwl file path
 cwl_work_path = '/home/typingliu/temp/'
 
@@ -53,3 +53,4 @@ with DAG(
     )
 
     task0 >> task1 >> task2 >> task3
+

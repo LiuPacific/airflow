@@ -15,10 +15,11 @@ job_file_path = '/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/cw
 basedir = '/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/cwl_tools/rw_example'  # cwl file path
 cwl_work_path = '/home/typingliu/temp/'
 
+
 with DAG(
-    dag_id='cwl_2nodes_dag',
+    dag_id='cwl_1node_dag1',
     default_args=default_args,
-    description="hara's first local py controlled cwl dag",
+    description="hara's first cwl operator dag",
     start_date=datetime(2024, 1, 1, 0),
     schedule_interval='@daily'
 ) as tag:
@@ -37,19 +38,10 @@ with DAG(
         cwl_work_path=cwl_work_path
     )
 
-    task2 = CwlLocalOperator(
-        task_id='task_2',  # cwltool echo.cwl.yaml --message_text="hello typing"
-        cwl_file_path=cwl_file_path,
-        cwl_step_to_run='countWords',
-        is_final_step=True,
-        basedir=basedir,
-        job_file_path=job_file_path,
-        cwl_work_path=cwl_work_path
-    )
-
-    task3 = BashOperator(
-        task_id='task_3',
+    task2 = BashOperator(
+        task_id='task_2',
         bash_command='echo "Hara, Congratulations!"'
     )
 
-    task0 >> task1 >> task2 >> task3
+    task0 >> task1 >> task2
+

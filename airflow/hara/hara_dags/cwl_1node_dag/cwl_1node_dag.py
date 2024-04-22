@@ -10,8 +10,14 @@ default_args = {
     'retry_delay': timedelta(minutes=2)
 }
 
+cwl_file_path = '/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/cwl_tools/rw_example/hara_workflow.cwl.yaml'
+job_file_path = '/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/cwl_tools/rw_example/hara_job.yaml'
+basedir = '/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/cwl_tools/rw_example'  # cwl file path
+cwl_work_path = '/home/typingliu/temp/'
+
+
 with DAG(
-    dag_id='first_controled_cwl_dag',
+    dag_id='cwl_1node_dag',
     default_args=default_args,
     description="hara's first local cwl dag",
     start_date=datetime(2024, 1, 1, 0),
@@ -24,17 +30,14 @@ with DAG(
 
     task1 = CwlLocalOperator(
         task_id='task_1',  # cwltool echo.cwl.yaml --message_text="hello typing"
-        cwl_file_path='/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/cwl_tools/rw_example/hara_workflow.cwl.yaml',
+        cwl_file_path=cwl_file_path,
         cwl_step_to_run='writeMessage',
         is_final_step=False,
-        file_kv_path='/home/typingliu/temp/hara_kv_db.json',
-        tmpdir_prefix='/home/typingliu/temp/',
-        tmp_outdir_prefix= '/home/typingliu/temp/',
-        stagedir='/home/typingliu/temp/stagedir/',
-        outdir='/home/typingliu/temp/outdir/',
-        basedir='/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/cwl_tools/rw_example', # cwl path
-        job_file_path='/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/cwl_tools/rw_example/hara_job.yaml',
+        basedir=basedir,
+        job_file_path=job_file_path,
+        cwl_work_path=cwl_work_path
     )
+
     task2 = BashOperator(
         task_id='task_2',
         bash_command='echo "Hara, Congratulations!"'

@@ -107,14 +107,14 @@ class CwlLocalOperator(BaseOperator):
         cwl_file_path = self.cwl_file_path
         job_file_path = self.job_file_path
 
-        tmpdir_prefix = os.path.join(self.cwl_work_path, run_id, 'tmp_outdir')
-        tmp_outdir_prefix = os.path.join(self.cwl_work_path, run_id)
+        tmpdir_prefix = os.path.join(self.cwl_work_path, path_safe_run_id, 'tmp_outdir')
+        tmp_outdir_prefix = os.path.join(self.cwl_work_path, path_safe_run_id)
         # runtime_context.tmpdir = '/home/typingliu/temp/tmpdir/'
-        stagedir = os.path.join(self.cwl_work_path, run_id, 'stagedir/')
-        outdir = os.path.join(self.cwl_work_path, run_id, 'outdir/')
+        stagedir = os.path.join(self.cwl_work_path, path_safe_run_id, 'stagedir/')
+        outdir = os.path.join(self.cwl_work_path, path_safe_run_id, 'outdir/')
 
         basedir = self.basedir
-        file_kv_path = os.path.join(self.cwl_work_path, run_id, 'hara_kv_db.json')
+        file_kv_path = os.path.join(self.cwl_work_path, path_safe_run_id, 'hara_kv_db.json')
         cwl_step_to_run = self.cwl_step_to_run;
         is_final_step = self.is_final_step;
 
