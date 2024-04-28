@@ -45,7 +45,9 @@ def main():
     parser = cli_parser.get_parser()
     argcomplete.autocomplete(parser)
     # args = parser.parse_args()
-    args = parser.parse_args(['tasks', 'test', 'first_controled_cwl_dag', 'task_1', '2024-02-01'])
+    # args = parser.parse_args(['tasks', 'test', 'first_controled_cwl_dag', 'task_1', '2024-02-01'])
+    args = parser.parse_args(['tasks', 'test', 'inside_dynamic_once_dag0', 'task_1', '2024-02-01'])
+    # args = parser.parse_args(['tasks', 'test', 'dynamic_once_dag0', 'task_1', '2024-02-01'])
     args.func(args)
 
 

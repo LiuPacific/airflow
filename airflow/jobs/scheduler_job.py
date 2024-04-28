@@ -713,9 +713,11 @@ class SchedulerJob(BaseJob):
 
         self.log.info("Starting the scheduler")
 
+        # hara changed:
         # DAGs can be pickled for easier remote execution by some executors
-        pickle_dags = self.do_pickle and self.executor_class not in UNPICKLEABLE_EXECUTORS
-
+        # pickle_dags = self.do_pickle and self.executor_class not in UNPICKLEABLE_EXECUTORS
+        pickle_dags = self.do_pickle
+        # hara change ended
         self.log.info("Processing each file at most %s times", self.num_times_parse_dags)
 
         # When using sqlite, we do not use async_mode

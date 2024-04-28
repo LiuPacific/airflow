@@ -744,6 +744,7 @@ class DagFileProcessor(LoggingMixin):
 
         try:
             dagbag = DagBag(file_path, include_examples=False)
+            hara_add_dag(dagbag)
         except Exception:
             self.log.exception("Failed at reloading the DAG file %s", file_path)
             Stats.incr("dag_file_refresh_error", 1, 1)
@@ -768,6 +769,7 @@ class DagFileProcessor(LoggingMixin):
         dagbag.sync_to_db(processor_subdir=self._dag_directory, session=session)
         session.commit()
 
+
         if pickle_dags:
             paused_dag_ids = DagModel.get_paused_dag_ids(dag_ids=dagbag.dag_ids)
 
@@ -777,6 +779,7 @@ class DagFileProcessor(LoggingMixin):
 
             for dag in unpaused_dags:
                 dag.pickle(session)
+
 
         # Record import errors into the ORM
         try:
@@ -791,3 +794,46 @@ class DagFileProcessor(LoggingMixin):
             self.log.exception("Error logging DAG warnings.")
 
         return len(dagbag.dags), len(dagbag.import_errors)
+
+def hara_add_dag(hdagbag : DagBag):
+    from airflow import DAG
+    from datetime import datetime, timedelta
+    from airflow.operators.bash import BashOperator
+
+    def create_dag(dag_id, owner, start_date, retry_delay_minutes):
+        default_args = {
+            'owner': owner,
+            'start_date': start_date,
+            'retry_delay': timedelta(minutes=retry_delay_minutes),
+        }
+
+        dag_obj = DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None)
+
+        # Create tasks and explicitly assign them to the DAG
+        task1 = BashOperator(
+            task_id='task_1',
+            bash_command='echo "Hello Harada!"',
+            dag=dag_obj
+        )
+        task2 = BashOperator(
+            task_id='task_2',
+            bash_command='echo "my second operator"',
+            dag=dag_obj
+        )
+
+        task3 = BashOperator(
+            task_id='task_3',
+            bash_command='echo "my third operator"',
+            dag=dag_obj
+        )
+
+        task1 >> task2 >> task3
+        # task2 >> task3
+        return dag_obj
+
+
+    dag_id = f'inside_dynamic_once_dag0'
+    dag_obj = create_dag(dag_id, owner='harada', start_date=datetime(2024, 4, 10), retry_delay_minutes=5)
+    hdagbag.dags[dag_obj.dag_id] = dag_obj
+
+
