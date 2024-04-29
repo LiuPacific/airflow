@@ -2308,6 +2308,7 @@ class DAG(LoggingMixin):
             # hara change starts:
             if dag.pickle_id is None:
                 # hara change ended.
+                log.info("pickling dag id is %s", dag.dag_id)
                 dp = DagPickle(dag=self)
                 session.add(dp)
                 self.last_pickled = timezone.utcnow()

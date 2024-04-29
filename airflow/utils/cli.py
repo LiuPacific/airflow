@@ -261,6 +261,21 @@ def get_dag_by_pickle(pickle_id, session=None):
     pickle_dag = dag_pickle.pickle
     return pickle_dag
 
+# hara change starts:
+@provide_session
+def get_pickled_dag_by_dag_id(dag_id, session=None):
+    """Fetch DAG from the database using pickling"""
+    from airflow.models import DagPickle
+    from airflow.models import DagModel
+
+    dag = session.query(DagModel).filter(DagModel.dag_id == dag_id).first()
+    dag_pickle = session.query(DagPickle).filter(DagPickle.id == dag.pickle_id).first()
+    if not dag_pickle:
+        # raise AirflowException(f"pickle_id could not be found in the dag: {dag.dag_id}")
+        return None
+    pickle_dag = dag_pickle.pickle
+    return pickle_dag
+# hara change ends;
 
 def setup_locations(process, pid=None, stdout=None, stderr=None, log=None):
     """Creates logging paths"""
