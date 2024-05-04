@@ -745,7 +745,7 @@ class DagFileProcessor(LoggingMixin):
         try:
             dagbag = DagBag(file_path, include_examples=False)
             # hara change starts
-            hara_add_dag(dagbag)
+            # hara_add_dag(dagbag)
         except Exception as e:
             print(e)
             # hara change ends;
