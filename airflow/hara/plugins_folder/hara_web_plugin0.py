@@ -6,6 +6,9 @@ from airflow.hara.cwl_tools.config import constants
 from airflow.models.dagbag import DagBag
 from airflow.utils.session import NEW_SESSION, provide_session
 from sqlalchemy.orm.session import Session
+from typing import List
+
+import yaml
 import os
 
 # Define the blueprint
@@ -49,9 +52,180 @@ curl --location 'http://127.0.0.1:8081/hara_pre/add_cwl' \
 CWL_FOLDER = '/home/typingliu/cwl_demo/'
 
 
-# cwl with commandlinetool
+def get_cwl_saving_dir_path(workflow_name: str):
+    return os.path.join(CWL_FOLDER, workflow_name)
+
+
+def get_cwl_saving_path(workflow_name: str, cwl_file_name: str):
+    return os.path.join(get_cwl_saving_dir_path(workflow_name), cwl_file_name)
+
+
 @blueprint0.route('/add_cwl', methods=['POST'])
 def add_cwl():
+    """
+    1. receive json
+        - workflow_name
+        - main_cwl
+        - command_tool_lines
+    2. get the json of workflow and commandlinetool
+    3. save the json as cwl locally
+    4. dynamically build the cwls to dag
+    5. register the dag
+    """
+    if request.is_json:
+        cwls_json_dict = request.get_json()
+        print(type(cwls_json_dict))
+
+        workflow_name = cwls_json_dict.get("workflow_name")
+        main_cwl_dict = cwls_json_dict.get("main_cwl")
+        command_line_tools_dict = cwls_json_dict.get("command_line_tools")
+
+        cwl_saving_dir_path = get_cwl_saving_dir_path(workflow_name)
+        os.makedirs(cwl_saving_dir_path, exist_ok=True)
+
+        # save cwls locally
+
+        main_cwl_path = get_cwl_saving_path(workflow_name, "main.cwl")
+        with open(main_cwl_path, "w") as main_cwl_file:
+            yaml_str = yaml.dump(main_cwl_dict, sort_keys=False)
+            main_cwl_file.write(yaml_str)
+
+        command_line_tool_paths = []
+        for command_line_tool_file_name in command_line_tools_dict:
+            command_line_tool_content = command_line_tools_dict.get(command_line_tool_file_name)
+            command_line_tool_cwl_path = get_cwl_saving_path(workflow_name, command_line_tool_file_name)
+            command_line_tool_paths.append(command_line_tool_cwl_path)
+            with open(command_line_tool_cwl_path, "w") as command_line_tool_file:
+                yaml_str = yaml.dump(command_line_tool_content, sort_keys=False)
+                command_line_tool_file.write(yaml_str)
+
+        dag_obj = generate_dag(workflow_name, main_cwl_dict)
+        register_cwl(dag_obj)
+
+        return jsonify({"message": "JSON received successfully!", "dag_id": 1}), 200
+    else:
+        return jsonify({"error": "json required"}), 400
+
+
+# generate dag
+def generate_dag(workflow_name: str, main_cwl_dict: dict):
+    """
+    1. init all steps
+    2. set dependencies according to main workflow
+
+    cwlVersion: v1.2
+    class: Workflow
+    inputs:
+      message_for_step1: string # input to wc
+    steps:
+      writeMessage:
+        run: hara_docker_write.cwl.yaml
+        in:
+          sentence_to_wc: message_for_step1
+        out: [out1]
+      countWords:
+        run: hara_wc.cwl.yaml
+        in:
+          infile: writeMessage/out1
+        out: [wordcount_result]
+    outputs:
+      workflow_result_wc:
+        type: File
+        outputSource: countWords/wordcount_result
+
+    :param workflow_name:
+    :param cwl_saving_path:
+    :param main_cwl_dict:
+    :param command_line_tools_dict:
+    :return:
+    """
+
+    from airflow import DAG
+    from datetime import datetime, timedelta
+    from airflow.operators.bash import BashOperator
+    from airflow.hara.hara_operator.cwl_local_pyoperator import CwlLocalOperator
+
+    default_args = {
+        'owner': 'harada',
+        'start_date': datetime(2024, 4, 10),
+        'retry_delay': timedelta(minutes=5),
+    }
+    dag_obj = DAG(dag_id=workflow_name, default_args=default_args, schedule_interval=None)
+
+    cwl_work_path = '/home/typingliu/temp/'
+
+    cwl_step_task_dict = {}
+    # init all operators
+    for step_id in main_cwl_dict.get("steps"):
+        task_obj = CwlLocalOperator(
+            task_id=step_id,  # cwltool echo.cwl.yaml --message_text="hello typing"
+            cwl_file_path=get_cwl_saving_path(workflow_name,"main.cwl"),
+            cwl_step_to_run=step_id,
+            is_final_step=False,
+            # TODO hara: there will be multiple final step, the one in charge of cleaning
+            basedir=get_cwl_saving_dir_path(workflow_name),
+            job_file_path=get_cwl_saving_path(workflow_name, 'job.yaml'), # TODO hara: at one dag run time, only one job can be run.
+            # TODO hara: current one cwl corresponds to one job
+            cwl_work_path=cwl_work_path,
+            dag=dag_obj
+        )
+        cwl_step_task_dict[step_id] = task_obj
+    # set dependencies
+    for step_id in main_cwl_dict.get("steps"):
+        step_in = main_cwl_dict.get("steps").get(step_id).get("in")
+        if step_in is None:
+            continue
+
+        dependency_steps = []
+        for command_line_tool_arg in step_in:
+            #     in:
+            #       infile: writeMessage/out1
+            input_path = step_in.get(command_line_tool_arg)  # writeMessage/out1
+            if input_path.count("/") != 1:
+                continue
+
+            # multiple dependencies required
+            dependency_step = input_path[0:input_path.index('/')]
+            cwl_step_task_dict[step_id].set_upstream(
+                cwl_step_task_dict[dependency_step])  # TODO hara: does it work for multiple dependencies?
+            dependency_steps.append(dependency_step)
+            # TODO hara: source, output need to be considered.
+        # if len(dependency_steps) > 0:
+        #     cwl_step_task_dict[step_id].set_upstream(cwl_step_task_dict[dependency_steps])
+        # TODO hara: final node
+
+    return dag_obj
+
+
+# job.yaml is required
+# workflow_name is required
+# other files can be uploaded together
+@blueprint0.route('/add_job_file', methods=['POST'])
+def add_job_file():
+    if 'files' not in request.files:
+        return jsonify({'message': 'No files part in the request'}), 400
+    files = request.files.getlist('files')
+    if not files or files[0].filename == '':
+        return jsonify({'message': 'No selected file'}), 400
+
+    # TODO hara: some validation should be added on the cwl name.
+    workflow_name = request.form.get('workflow_name')
+    saving_dir_path = get_cwl_saving_dir_path(workflow_name)
+    if not os.path.exists(saving_dir_path):
+        os.makedirs(saving_dir_path)
+    for file in files:
+        if file.filename == '':
+            return jsonify({'message': 'No selected file'}), 400
+
+        # Save each cwl file
+        file_path = os.path.join(saving_dir_path, file.filename)
+        file.save(file_path)
+    return jsonify({'message': f'{len(files)} files have been uploaded successfully.'}), 200
+
+
+# cwl with commandlinetool
+@blueprint0.route('/add_cwl_hardcode', methods=['POST'])
+def add_cwl_hardcode():
     if 'files' not in request.files:
         return jsonify({'message': 'No files part in the request'}), 400
     files = request.files.getlist('files')
@@ -70,18 +244,17 @@ def add_cwl():
         # Save each cwl file
         file_path = os.path.join(saving_dir_path, file.filename)
         file.save(file_path)
-
-    register_cwl()
+    dag_obj = hara_add_dag()
+    register_cwl(dag_obj=dag_obj)
     return jsonify({'message': f'{len(files)} files have been uploaded successfully.'}), 200
 
 
 @provide_session
-def register_cwl(session: Session = NEW_SESSION, ):
+def register_cwl(dag_obj, session: Session = NEW_SESSION):
     print('hara register dag start')
     dag_dir = '/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/dags_folder'
     dagbag = DagBag(dag_dir, include_examples=False)
 
-    dag_obj = hara_add_dag()
     dagbag.dags[dag_obj.dag_id] = dag_obj
 
     dagbag.sync_to_db(processor_subdir=dag_dir, session=session)
