@@ -29,7 +29,21 @@ def create_dag(dag_id, owner, start_date, retry_delay_minutes):
         dag=dag_obj
     )
 
-    task1 >> task2 >> task3
+    task4 = BashOperator(
+        task_id='task_4',
+        bash_command='echo "my third operator"',
+        dag=dag_obj
+    )
+
+    task5 = BashOperator(
+        task_id='task_5',
+        bash_command='echo "my third operator"',
+        dag=dag_obj
+    )
+
+    task2.set_upstream(task1)
+    task4.set_upstream(task3)
+    # task1 >> task2 >> task3
     # task2 >> task3
     return dag_obj
 

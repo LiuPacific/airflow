@@ -822,7 +822,7 @@ class HaraCommandLineTool(Process):
         # hara changed: outdir of each cmd node
         # runtimeContext.outdir = '/home/typingliu/temp/tmp_outdir/'+jobname+'/'
         runtimeContext.outdir = os.path.join(runtimeContext.tmpdir_prefix,jobname)
-
+        # hara change ends
         if runtimeContext.cachedir and enableReuse:
             cachecontext = runtimeContext.copy()
             cachecontext.outdir = "/out"

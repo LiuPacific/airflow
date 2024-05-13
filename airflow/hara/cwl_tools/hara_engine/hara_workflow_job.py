@@ -409,7 +409,7 @@ def object_from_state(
                             workflowStateItem = pickle.loads(workflowStateItem_pickled)
                             # state[inp["id"]] = workflowStateItem
                             state[src] = workflowStateItem
-
+                ## hara change ends
 
                 a_state = state.get(src, None)
                 if a_state is not None and (
@@ -581,6 +581,7 @@ class HaraWorkflowJob:
                         constants.get_hara_context().kvdb.set(constants.get_hara_context().run_id + iid,
                                                               workflowStateItem_pickled_base64)
                     else:
+                        ## hara change ends
                         self.state[iid] = WorkflowStateItem(i, jobout[iid], processStatus)
                 else:
                     _logger.error("[%s] Output is missing expected field %s", step.name, iid)
