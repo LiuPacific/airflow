@@ -49,6 +49,7 @@ if TYPE_CHECKING:
     from airflow.hara.cwl_tools.hara_engine.hara_workflow import WorkflowStep
 
 from airflow.hara.cwl_tools.config import constants
+from airflow.hara.cwl_tools.hara_engine.node_tool import node_manager
 
 
 class WorkflowJobStep:
@@ -405,7 +406,8 @@ def object_from_state(
                             constants.get_hara_context().run_id + src)
                         if workflowStateItem_pickled_base64 is not None:
                             # raise WorkflowException("the dependency isn't sufficient to run the current node: " % (src))
-                            workflowStateItem_pickled = base64.b64decode(workflowStateItem_pickled_base64.encode("ascii"))
+                            workflowStateItem_pickled = base64.b64decode(
+                                workflowStateItem_pickled_base64.encode("ascii"))
                             workflowStateItem = pickle.loads(workflowStateItem_pickled)
                             # state[inp["id"]] = workflowStateItem
                             state[src] = workflowStateItem
@@ -577,7 +579,8 @@ class HaraWorkflowJob:
                     if constants.get_hara_context().is_separate_mode:
                         workflowStateItem = WorkflowStateItem(i, jobout[iid], processStatus)
                         workflowStateItem_pickled = pickle.dumps(workflowStateItem)
-                        workflowStateItem_pickled_base64 = base64.b64encode(workflowStateItem_pickled).decode("ascii")
+                        workflowStateItem_pickled_base64 = base64.b64encode(workflowStateItem_pickled).decode(
+                            "ascii")
                         constants.get_hara_context().kvdb.set(constants.get_hara_context().run_id + iid,
                                                               workflowStateItem_pickled_base64)
                     else:
@@ -597,7 +600,15 @@ class HaraWorkflowJob:
         else:
             _logger.info("[%s] completed %s", step.name, processStatus)
 
+        ## hara change starts:
+        # origin
+        # step.completed = True
+        # change:
         step.completed = True
+        node_manager.set_task_info(step.name, 'success')
+        node_manager.add_node_completed_num()
+        ## hara change ends
+
         # Release the iterable related to this step to
         # reclaim memory.
         step.iterable = None
@@ -605,8 +616,11 @@ class HaraWorkflowJob:
 
         ## hara changed: judge whether the current step is the last step
         if constants.get_hara_context().is_separate_mode:
-            if constants.get_hara_context().is_final_step:
+            if node_manager.get_node_completed_num() == len(self.steps):
                 self.do_output_callback(final_output_callback)
+            # the final step mechanism is cancelled out due to uncertain end nodes.
+            # if constants.get_hara_context().is_final_step:
+            #     self.do_output_callback(final_output_callback)
 
         else:  # In origin mode, if it's the last step, it will output using completed mechanism, which is to count the successful nodes.
             completed = sum(1 for s in self.steps if s.completed)

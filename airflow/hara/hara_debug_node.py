@@ -48,6 +48,7 @@ def main():
     # args = parser.parse_args(['tasks', 'test', 'first_controled_cwl_dag', 'task_1', '2024-02-01'])
     args = parser.parse_args(['tasks', 'test', 'inside_dynamic_once_dag0', 'task_1', '2024-02-01'])
     # args = parser.parse_args(['tasks', 'test', 'dynamic_once_dag0', 'task_1', '2024-02-01'])
+    args = parser.parse_args(['tasks', 'test', 'inside_controlled_docker_cwl_dag9', 'writeMessage', '2024-02-01'])
     args.func(args)
 
 
