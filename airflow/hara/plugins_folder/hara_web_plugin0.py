@@ -1,12 +1,15 @@
 import json
 
 from flask import Blueprint, jsonify, request
+from requests import HTTPError, Timeout, RequestException
+
 from airflow.plugins_manager import AirflowPlugin
 from airflow.hara.cwl_tools.config import constants
 from airflow.models.dagbag import DagBag
 from airflow.utils.session import NEW_SESSION, provide_session
 from sqlalchemy.orm.session import Session
 from typing import List
+import requests
 
 import yaml
 import os
@@ -159,11 +162,12 @@ def generate_dag(workflow_name: str, main_cwl_dict: dict):
     for step_id in main_cwl_dict.get("steps"):
         task_obj = CwlLocalOperator(
             task_id=step_id,  # cwltool echo.cwl.yaml --message_text="hello typing"
-            cwl_file_path=get_cwl_saving_path(workflow_name,"main.cwl"),
+            cwl_file_path=get_cwl_saving_path(workflow_name, "main.cwl"),
             cwl_step_to_run=step_id,
             # TODO hara: there will be multiple final step, the one in charge of cleaning
             basedir=get_cwl_saving_dir_path(workflow_name),
-            job_file_path=get_cwl_saving_path(workflow_name, 'job.yaml'), # TODO hara: at one dag run time, only one job can be run.
+            job_file_path=get_cwl_saving_path(workflow_name, 'job.yaml'),
+            # TODO hara: at one dag run time, only one job can be run.
             # TODO hara: current one cwl corresponds to one job
             cwl_work_path=cwl_work_path,
             dag=dag_obj
@@ -199,8 +203,8 @@ def generate_dag(workflow_name: str, main_cwl_dict: dict):
 # job.yaml is required
 # workflow_name is required
 # other files can be uploaded together
-@blueprint0.route('/add_job_file', methods=['POST'])
-def add_job_file():
+@blueprint0.route('/trigger_cwl', methods=['POST'])
+def trigger_cwl():
     if 'files' not in request.files:
         return jsonify({'message': 'No files part in the request'}), 400
     files = request.files.getlist('files')
@@ -208,8 +212,8 @@ def add_job_file():
         return jsonify({'message': 'No selected file'}), 400
 
     # TODO hara: some validation should be added on the cwl name.
-    workflow_name = request.form.get('workflow_name')
-    saving_dir_path = get_cwl_saving_dir_path(workflow_name)
+    dag_id = request.form.get('dag_id')
+    saving_dir_path = get_cwl_saving_dir_path(dag_id)
     if not os.path.exists(saving_dir_path):
         os.makedirs(saving_dir_path)
     for file in files:
@@ -219,10 +223,66 @@ def add_job_file():
         # Save each cwl file
         file_path = os.path.join(saving_dir_path, file.filename)
         file.save(file_path)
-    return jsonify({'message': f'{len(files)} files have been uploaded successfully.'}), 200
+
+    trigger_response_dict = request_trigger(dag_id)
+
+    return jsonify(trigger_response_dict), 200
 
 
-# cwl with commandlinetool
+def request_trigger(dag_id: str):
+    url_for_trigger = f"http://localhost:8081/api/v1/dags/{dag_id}/dagRuns"
+    headers_dict = {
+        "Content-Type": "application/json",
+        # "Authorization": "ACCESS_TOKEN"
+    }
+    json_data_dict = {
+        "conf": {
+            "param1": "value1",
+            # TODO hara: to support multiple jobfile in one DAG, then here the jobfile can be defined. or even passed jobfile content directly.
+            "param2": "value2"
+        }
+    }
+
+    try:
+        response = requests.post(url_for_trigger, headers=headers_dict, json=json_data_dict)
+        response.raise_for_status()
+        print(f"Status code: {response.status_code}")
+        print("Response JSON:", response.json())
+
+        '''
+        {
+            "conf": {
+                "param1": "value1",
+                "param2": "value2"
+            },
+            "dag_id": "inside_controlled_docker_cwl_dag9",
+            "dag_run_id": "manual__2024-05-16T04:32:01.758290+00:00",
+            "data_interval_end": "2024-05-16T04:32:01.758290+00:00",
+            "data_interval_start": "2024-05-16T04:32:01.758290+00:00",
+            "end_date": null,
+            "execution_date": "2024-05-16T04:32:01.758290+00:00",
+            "external_trigger": true,
+            "last_scheduling_decision": null,
+            "logical_date": "2024-05-16T04:32:01.758290+00:00",
+            "note": null,
+            "run_type": "manual",
+            "start_date": null,
+            "state": "queued"
+        }
+        '''
+        return response.json()
+    # except HTTPError as http_err:
+    #     print(f"HTTP error occurred: {http_err}")
+    # except Timeout as timeout_err:
+    #     print(f"Request timed out: {timeout_err}")
+    # except RequestException as req_err:
+    #     print(f"Request exception occurred: {req_err}")
+    except Exception as err:
+        print(f"An error occurred: {err}")
+        raise err
+
+
+# it's a test for cwl with commandlinetool
 @blueprint0.route('/add_cwl_hardcode', methods=['POST'])
 def add_cwl_hardcode():
     if 'files' not in request.files:
