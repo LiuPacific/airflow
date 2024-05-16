@@ -102,7 +102,7 @@ def add_cwl():
         dag_obj = generate_dag(workflow_name, main_cwl_dict)
         register_cwl(dag_obj)
 
-        return jsonify({"message": "JSON received successfully!", "dag_id": 1}), 200
+        return jsonify({"message": "JSON received successfully!", "dag_id": dag_obj.dag_id}), 200
     else:
         return jsonify({"error": "json required"}), 400
 
@@ -161,7 +161,6 @@ def generate_dag(workflow_name: str, main_cwl_dict: dict):
             task_id=step_id,  # cwltool echo.cwl.yaml --message_text="hello typing"
             cwl_file_path=get_cwl_saving_path(workflow_name,"main.cwl"),
             cwl_step_to_run=step_id,
-            is_final_step=False,
             # TODO hara: there will be multiple final step, the one in charge of cleaning
             basedir=get_cwl_saving_dir_path(workflow_name),
             job_file_path=get_cwl_saving_path(workflow_name, 'job.yaml'), # TODO hara: at one dag run time, only one job can be run.
@@ -301,7 +300,6 @@ def hara_add_dag():
             task_id='task_1',  # cwltool echo.cwl.yaml --message_text="hello typing"
             cwl_file_path=cwl_file_path,
             cwl_step_to_run='writeMessage',
-            is_final_step=False,
             basedir=basedir,
             job_file_path=job_file_path,
             cwl_work_path=cwl_work_path,
@@ -312,7 +310,6 @@ def hara_add_dag():
             task_id='task_2',  # cwltool echo.cwl.yaml --message_text="hello typing"
             cwl_file_path=cwl_file_path,
             cwl_step_to_run='countWords',
-            is_final_step=True,
             basedir=basedir,
             job_file_path=job_file_path,
             cwl_work_path=cwl_work_path,

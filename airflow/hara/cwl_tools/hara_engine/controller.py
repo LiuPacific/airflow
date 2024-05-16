@@ -34,6 +34,7 @@ from airflow.hara.cwl_tools.hara_engine import hara_command_line_tool, hara_work
     hara_workflow_job
 from airflow.hara.cwl_tools.config import constants
 from airflow.hara.cwl_tools.tools import cwl_log
+from airflow.hara.cwl_tools.hara_engine.node_tool import node_manager
 
 # refer to factory.WorkflowStatus
 class HaraWorkflowStatus(Exception):
@@ -205,7 +206,7 @@ class HaraCwlEngine:
 
         ## hara changed: when running in whole-workflow mode, it should be true, since the last node is a final node.
         if (
-            constants.get_hara_context().is_separate_mode and constants.get_hara_context().is_final_step
+            constants.get_hara_context().is_separate_mode and (node_manager.get_node_completed_num() == node_manager.get_workflow_step_num())
         ) or (
             not constants.get_hara_context().is_separate_mode
         ):

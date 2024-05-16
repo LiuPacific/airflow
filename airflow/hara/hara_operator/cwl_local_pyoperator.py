@@ -84,7 +84,6 @@ class CwlLocalOperator(BaseOperator):
         *,
         cwl_file_path: str,
         cwl_step_to_run: str,
-        is_final_step: bool,
         basedir: str,
         job_file_path: str,
         cwl_work_path: str,
@@ -93,7 +92,6 @@ class CwlLocalOperator(BaseOperator):
         super().__init__(**kwargs)
         self.cwl_file_path = cwl_file_path
         self.cwl_step_to_run = cwl_step_to_run
-        self.is_final_step = is_final_step
         self.basedir = basedir
         self.job_file_path = job_file_path
         self.cwl_work_path = cwl_work_path
@@ -116,7 +114,6 @@ class CwlLocalOperator(BaseOperator):
         basedir = self.basedir
         file_kv_path = os.path.join(self.cwl_work_path, path_safe_run_id, 'hara_kv_db.json')
         cwl_step_to_run = self.cwl_step_to_run;
-        is_final_step = self.is_final_step;
 
 
         hara_cwl_engine = controller.HaraCwlEngine()
@@ -131,7 +128,6 @@ class CwlLocalOperator(BaseOperator):
                                                   run_id=path_safe_run_id,
                                                   file_kv_path=file_kv_path,
                                                   step_to_run=cwl_step_to_run,
-                                                  is_final_step=is_final_step,
                                                   is_separate_mode=True
                                                   )
 

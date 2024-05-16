@@ -47,7 +47,6 @@ def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_pr
                 run_id: str,
                 file_kv_path: str,
                 step_to_run: str,
-                is_final_step: bool,
                 is_separate_mode: bool
                 ):
     runtime_context = hara_runtime_context.copy()
@@ -63,7 +62,7 @@ def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_pr
         os.makedirs(outdir)
     runtime_context.default_stderr = open(os.path.join(outdir, 'error.log'), 'w')
 
-    constants.init_hara_context(step_to_run, run_id, is_final_step, is_separate_mode, file_kv_path)
+    constants.init_hara_context(step_to_run, run_id, is_separate_mode, file_kv_path)
 
     # Load job parameters from a YAML or JSON file
     with open(job_file_path) as job_params:

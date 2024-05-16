@@ -7,7 +7,6 @@ class TestNodeManager(unittest.TestCase):
     def setUp(self):
         constants.init_hara_context(step_to_run='countWords',
                                     run_id='manual__2024-05-13T03_03_39.563737_00_00',
-                                    is_final_step=False,
                                     is_separate_mode=True,
                                     file_kv_path='/home/typingliu/temp/manual__2024-05-13T03_03_39.563737_00_00/hara_kv_db.json')
     def test_add_node_completed_num(self):

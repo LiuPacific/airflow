@@ -25,7 +25,7 @@ def get_completed_key() -> str:
     return constants.get_hara_context().run_id + '_completed_num'
 
 
-def get_node_completed_num():
+def get_node_completed_num() -> int:
     completed_num = constants.get_hara_context().kvdb.get(get_completed_key())
     if completed_num is None:
         completed_num = 0
@@ -36,3 +36,16 @@ def add_node_completed_num():
     completed_num = get_node_completed_num()
     completed_num = completed_num + 1
     constants.get_hara_context().kvdb.set(get_completed_key(), completed_num)
+
+def get_step_num_key() -> str:
+    return constants.get_hara_context().run_id + '_step_num'
+
+def get_workflow_step_num() -> int:
+    workflow_step_num = constants.get_hara_context().kvdb.get(get_step_num_key())
+    if workflow_step_num is None:
+        raise "workflow_step_num is None"
+    return workflow_step_num
+
+
+def set_workflow_step_num(workflow_step_num:int):
+    constants.get_hara_context().kvdb.set(get_step_num_key(), workflow_step_num)

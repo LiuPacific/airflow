@@ -499,6 +499,9 @@ class HaraWorkflowJob:
             self.prov_obj = workflow.provenance_object
             self.parent_wf = workflow.parent_wf
         self.steps = [WorkflowJobStep(s) for s in workflow.steps]
+        ## hara change starts:
+        node_manager.set_workflow_step_num(len(self.steps))
+        ## hara change ends;
         self.state: Dict[str, Optional[WorkflowStateItem]] = {}
         self.processStatus = ""
         self.did_callback = False
@@ -615,12 +618,15 @@ class HaraWorkflowJob:
         self.made_progress = True
 
         ## hara changed: judge whether the current step is the last step
+
+        print("xxxx")
+        _logger.info("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+        _logger.info("[%s] completed. workflow %d/%d", step.name, node_manager.get_node_completed_num(),
+                     len(self.steps))
         if constants.get_hara_context().is_separate_mode:
             if node_manager.get_node_completed_num() == len(self.steps):
                 self.do_output_callback(final_output_callback)
-            # the final step mechanism is cancelled out due to uncertain end nodes.
-            # if constants.get_hara_context().is_final_step:
-            #     self.do_output_callback(final_output_callback)
+                _logger.info("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx do_output_callback")
 
         else:  # In origin mode, if it's the last step, it will output using completed mechanism, which is to count the successful nodes.
             completed = sum(1 for s in self.steps if s.completed)

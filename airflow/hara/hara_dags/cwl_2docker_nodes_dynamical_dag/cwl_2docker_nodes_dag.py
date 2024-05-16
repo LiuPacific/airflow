@@ -37,7 +37,6 @@ def create_dag(dag_id, owner, start_date, retry_delay_minutes):
         task_id='task_1',  # cwltool echo.cwl.yaml --message_text="hello typing"
         cwl_file_path=cwl_file_path,
         cwl_step_to_run='writeMessage',
-        is_final_step=False,
         basedir=basedir,
         job_file_path=job_file_path,
         cwl_work_path=cwl_work_path,
@@ -48,7 +47,6 @@ def create_dag(dag_id, owner, start_date, retry_delay_minutes):
         task_id='task_2',  # cwltool echo.cwl.yaml --message_text="hello typing"
         cwl_file_path=cwl_file_path,
         cwl_step_to_run='countWords',
-        is_final_step=True,
         basedir=basedir,
         job_file_path=job_file_path,
         cwl_work_path=cwl_work_path,

@@ -32,7 +32,6 @@ with DAG(
         task_id='task_1',  # cwltool echo.cwl.yaml --message_text="hello typing"
         cwl_file_path=cwl_file_path,
         cwl_step_to_run='writeMessage',
-        is_final_step=False,
         basedir=basedir,
         job_file_path=job_file_path,
         cwl_work_path=cwl_work_path

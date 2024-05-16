@@ -36,10 +36,8 @@ class TestSeparatedCwl(unittest.TestCase):
         file_kv_path = '/home/typingliu/temp/hara_kv_db.json'
 
         # step_to_run = 'writeMessage';
-        # is_final_step = False;
         # is_separate_mode = True;
         step_to_run = 'countWords';
-        is_final_step = True;
         is_separate_mode = True;
 
         hara_cwl_entry.execute_cwl(hara_cwl_engine.h_runtime_context, job_file_path,
@@ -47,7 +45,7 @@ class TestSeparatedCwl(unittest.TestCase):
                                    tmpdir_prefix=tmpdir_prefix, tmp_outdir_prefix=tmp_outdir_prefix,
                                    stagedir=stagedir, basedir=basedir, outdir=outdir,
                                    run_id=run_id, file_kv_path=file_kv_path,
-                                   step_to_run=step_to_run, is_final_step=is_final_step,
+                                   step_to_run=step_to_run,
                                    is_separate_mode=is_separate_mode
                                    )
         self.cwl_logger.info('finished')
@@ -72,10 +70,8 @@ class TestSeparatedCwl(unittest.TestCase):
         file_kv_path = os.path.join('/home/typingliu/temp/', run_id, 'hara_kv_db.json')
 
         # step_to_run = 'writeMessage';
-        # is_final_step = False;
         # is_separate_mode = True;
         step_to_run = 'countWords';
-        is_final_step = True;
         is_separate_mode = True;
 
         hara_cwl_entry.execute_cwl(hara_cwl_engine.h_runtime_context, job_file_path,
@@ -83,7 +79,7 @@ class TestSeparatedCwl(unittest.TestCase):
                                    tmpdir_prefix=tmpdir_prefix, tmp_outdir_prefix=tmp_outdir_prefix,
                                    stagedir=stagedir, basedir=basedir, outdir=outdir,
                                    run_id=run_id, file_kv_path=file_kv_path,
-                                   step_to_run=step_to_run, is_final_step=is_final_step,
+                                   step_to_run=step_to_run,
                                    is_separate_mode=is_separate_mode
                                    )
         self.cwl_logger.info('finished')
