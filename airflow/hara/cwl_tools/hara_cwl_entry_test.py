@@ -40,13 +40,16 @@ class TestSeparatedCwl(unittest.TestCase):
         step_to_run = 'countWords';
         is_separate_mode = True;
 
+        job_content = {"message_for_step1": "Kyoto Osaka Fukuoka Osaka Nagoya"}
+
         hara_cwl_entry.execute_cwl(hara_cwl_engine.h_runtime_context, job_file_path,
                                    workflow_process=workflow_process,
                                    tmpdir_prefix=tmpdir_prefix, tmp_outdir_prefix=tmp_outdir_prefix,
                                    stagedir=stagedir, basedir=basedir, outdir=outdir,
                                    run_id=run_id, file_kv_path=file_kv_path,
                                    step_to_run=step_to_run,
-                                   is_separate_mode=is_separate_mode
+                                   is_separate_mode=is_separate_mode,
+                                   job_content=job_content
                                    )
         self.cwl_logger.info('finished')
 
@@ -69,10 +72,12 @@ class TestSeparatedCwl(unittest.TestCase):
 
         file_kv_path = os.path.join('/home/typingliu/temp/', run_id, 'hara_kv_db.json')
 
-        # step_to_run = 'writeMessage';
-        # is_separate_mode = True;
-        step_to_run = 'countWords';
+        step_to_run = 'writeMessage';
         is_separate_mode = True;
+        # step_to_run = 'countWords';
+        # is_separate_mode = True;
+
+        job_content = {"message_for_step1": "Kyoto Osaka Fukuoka Osaka Nagoya"}
 
         hara_cwl_entry.execute_cwl(hara_cwl_engine.h_runtime_context, job_file_path,
                                    workflow_process=workflow_process,
@@ -80,6 +85,7 @@ class TestSeparatedCwl(unittest.TestCase):
                                    stagedir=stagedir, basedir=basedir, outdir=outdir,
                                    run_id=run_id, file_kv_path=file_kv_path,
                                    step_to_run=step_to_run,
-                                   is_separate_mode=is_separate_mode
+                                   is_separate_mode=is_separate_mode,
+                                   job_content=job_content
                                    )
         self.cwl_logger.info('finished')

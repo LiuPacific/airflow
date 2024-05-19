@@ -170,6 +170,7 @@ def generate_dag(workflow_name: str, main_cwl_dict: dict):
             # TODO hara: at one dag run time, only one job can be run.
             # TODO hara: current one cwl corresponds to one job
             cwl_work_path=cwl_work_path,
+            job_content=None,
             dag=dag_obj
         )
         cwl_step_task_dict[step_id] = task_obj
@@ -203,8 +204,8 @@ def generate_dag(workflow_name: str, main_cwl_dict: dict):
 # job.yaml is required
 # workflow_name is required
 # other files can be uploaded together
-@blueprint0.route('/trigger_cwl', methods=['POST'])
-def trigger_cwl():
+@blueprint0.route('/trigger_cwl_with_jobyaml', methods=['POST'])
+def trigger_cwl_with_jobyaml():
     if 'files' not in request.files:
         return jsonify({'message': 'No files part in the request'}), 400
     files = request.files.getlist('files')
@@ -224,24 +225,50 @@ def trigger_cwl():
         file_path = os.path.join(saving_dir_path, file.filename)
         file.save(file_path)
 
-    trigger_response_dict = request_trigger(dag_id)
+    trigger_response_dict = request_trigger(dag_id, None)
 
     return jsonify(trigger_response_dict), 200
 
 
-def request_trigger(dag_id: str):
+@blueprint0.route('/trigger_cwl', methods=['POST'])
+def trigger_cwl():
+    '''
+    receive json:
+        {
+            "dag_id": "fdsaf",
+            "job_content":{
+                "message_for_step1": "Kyoto Osaka Fukuoka Osaka Nagoya"
+            }
+        }
+    :return:
+    '''
+
+    if not request.is_json:
+        return jsonify({"error": "json required"}), 400
+    else:
+        trigger_json = request.get_json()
+        dag_id = trigger_json.get("dag_id")
+        job_content = trigger_json.get("job_content")
+        trigger_response_dict = request_trigger(dag_id, job_content)
+        return jsonify(trigger_response_dict), 200
+
+
+def request_trigger(dag_id: str, job_content: dict):
     url_for_trigger = f"http://localhost:8081/api/v1/dags/{dag_id}/dagRuns"
     headers_dict = {
         "Content-Type": "application/json",
         # "Authorization": "ACCESS_TOKEN"
     }
     json_data_dict = {
-        "conf": {
-            "param1": "value1",
-            # TODO hara: to support multiple jobfile in one DAG, then here the jobfile can be defined. or even passed jobfile content directly.
-            "param2": "value2"
-        }
+        "conf": {"job_content": job_content}
     }
+    # json_data_dict = {
+    #     "conf": {
+    #         "param1": "value1",
+    #         # TODO hara: to support multiple jobfile in one DAG, then here the jobfile can be defined. or even passed jobfile content directly.
+    #         "param2": "value2"
+    #     }
+    # }
 
     try:
         response = requests.post(url_for_trigger, headers=headers_dict, json=json_data_dict)

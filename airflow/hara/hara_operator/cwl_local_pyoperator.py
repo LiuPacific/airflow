@@ -28,7 +28,7 @@ from airflow.hara.cwl_tools.hara_engine import controller
 from airflow.models.baseoperator import BaseOperator
 from airflow.utils.context import Context
 from airflow.utils.operator_helpers import KeywordParameters
-
+from airflow.utils.context import Context, context_copy_partial, context_merge
 import os
 
 
@@ -87,6 +87,7 @@ class CwlLocalOperator(BaseOperator):
         basedir: str,
         job_file_path: str,
         cwl_work_path: str,
+        job_content: dict,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -95,9 +96,18 @@ class CwlLocalOperator(BaseOperator):
         self.basedir = basedir
         self.job_file_path = job_file_path
         self.cwl_work_path = cwl_work_path
+        self.job_content = job_content
 
     def execute(self, context: Context) -> Any:
         cwl_log.get_cwl_logger().info("start executing")
+
+        job_content = context['dag_run'].conf.get("job_content")
+        if job_content is None:
+            job_content = self.job_content
+
+        if job_content is not None:
+            cwl_log.get_cwl_logger().info("-----job_content: %s", job_content) # {'message_for_step1': 'Kyoto Osaka Fukuoka Osaka Nagoya Hokkaido'}
+            cwl_log.get_cwl_logger().info("-----job_content type: %s", type(job_content)) # dict
 
         run_id = context['dag_run'].run_id
         path_safe_run_id = run_id.replace(':', '_').replace(' ', '_').replace('+', '_')
@@ -113,8 +123,7 @@ class CwlLocalOperator(BaseOperator):
 
         basedir = self.basedir
         file_kv_path = os.path.join(self.cwl_work_path, path_safe_run_id, 'hara_kv_db.json')
-        cwl_step_to_run = self.cwl_step_to_run;
-
+        cwl_step_to_run = self.cwl_step_to_run
 
         hara_cwl_engine = controller.HaraCwlEngine()
         workflow_process = hara_cwl_engine.load_configuration(cwl_file_path)
@@ -128,7 +137,8 @@ class CwlLocalOperator(BaseOperator):
                                                   run_id=path_safe_run_id,
                                                   file_kv_path=file_kv_path,
                                                   step_to_run=cwl_step_to_run,
-                                                  is_separate_mode=True
+                                                  is_separate_mode=True,
+                                                  job_content=job_content,
                                                   )
 
         cwl_log.get_cwl_logger().info(return_value)

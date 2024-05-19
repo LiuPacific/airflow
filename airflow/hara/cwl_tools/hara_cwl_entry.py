@@ -47,7 +47,8 @@ def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_pr
                 run_id: str,
                 file_kv_path: str,
                 step_to_run: str,
-                is_separate_mode: bool
+                is_separate_mode: bool,
+                job_content: dict
                 ):
     runtime_context = hara_runtime_context.copy()
     runtime_context.basedir = basedir
@@ -64,13 +65,14 @@ def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_pr
 
     constants.init_hara_context(step_to_run, run_id, is_separate_mode, file_kv_path)
 
-    # Load job parameters from a YAML or JSON file
-    with open(job_file_path) as job_params:
-        job_file_items = yaml.safe_load(job_params)
+    if job_content is None:
+        # Load job parameters from a YAML or JSON file
+        with open(job_file_path) as job_params:
+            job_content = yaml.safe_load(job_params)
 
     # h_executor = SingleJobExecutor()
     hara_cwl_engine = controller.HaraCwlEngine()
-    out, status = hara_cwl_engine.hara_execute(process=workflow_process, job_order_object=job_file_items,
+    out, status = hara_cwl_engine.hara_execute(process=workflow_process, job_order_object=job_content,
                                                runtime_context=runtime_context)
     # out, status = h_executor(workflow_process, job_file_items, runtime_context=runtime_context)
     if status != "success":

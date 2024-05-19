@@ -15,6 +15,7 @@ inputs:
 
 stdout: docker_out1.txt
 
+
 outputs:
   out1:
     type: stdout
