@@ -128,6 +128,8 @@ class CwlLocalOperator(BaseOperator):
         hara_cwl_engine = controller.HaraCwlEngine()
         workflow_process = hara_cwl_engine.load_configuration(cwl_file_path)
 
+
+        # TODO hara: host network
         return_value = hara_cwl_entry.execute_cwl(hara_cwl_engine.h_runtime_context, job_file_path,
                                                   workflow_process=workflow_process,
                                                   tmpdir_prefix=tmpdir_prefix,

@@ -72,10 +72,10 @@ class TestSeparatedCwl(unittest.TestCase):
 
         file_kv_path = os.path.join('/home/typingliu/temp/', run_id, 'hara_kv_db.json')
 
-        step_to_run = 'writeMessage';
-        is_separate_mode = True;
-        # step_to_run = 'countWords';
+        # step_to_run = 'writeMessage';
         # is_separate_mode = True;
+        step_to_run = 'countWords';
+        is_separate_mode = True;
 
         job_content = {"message_for_step1": "Kyoto Osaka Fukuoka Osaka Nagoya"}
 

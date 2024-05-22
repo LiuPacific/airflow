@@ -249,9 +249,17 @@ def trigger_cwl():
         trigger_json = request.get_json()
         dag_id = trigger_json.get("dag_id")
         job_content = trigger_json.get("job_content")
+
+        # unpause
+        unpause_dag(dag_id)
+        # trigger
         trigger_response_dict = request_trigger(dag_id, job_content)
         return jsonify(trigger_response_dict), 200
 
+def unpause_dag(dag_id:  str):
+    url_for_unpause = f"http://localhost:8081/paused?is_paused=true&dag_id={dag_id}"
+    response = requests.post(url_for_unpause)
+    response.raise_for_status()
 
 def request_trigger(dag_id: str, job_content: dict):
     url_for_trigger = f"http://localhost:8081/api/v1/dags/{dag_id}/dagRuns"
@@ -262,13 +270,6 @@ def request_trigger(dag_id: str, job_content: dict):
     json_data_dict = {
         "conf": {"job_content": job_content}
     }
-    # json_data_dict = {
-    #     "conf": {
-    #         "param1": "value1",
-    #         # TODO hara: to support multiple jobfile in one DAG, then here the jobfile can be defined. or even passed jobfile content directly.
-    #         "param2": "value2"
-    #     }
-    # }
 
     try:
         response = requests.post(url_for_trigger, headers=headers_dict, json=json_data_dict)

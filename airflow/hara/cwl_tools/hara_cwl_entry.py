@@ -62,6 +62,7 @@ def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_pr
     if not os.path.exists(outdir):
         os.makedirs(outdir)
     runtime_context.default_stderr = open(os.path.join(outdir, 'error.log'), 'w')
+    runtime_context.default_stdout = open(os.path.join(outdir, 'stdout.log'), 'w')
 
     constants.init_hara_context(step_to_run, run_id, is_separate_mode, file_kv_path)
 
