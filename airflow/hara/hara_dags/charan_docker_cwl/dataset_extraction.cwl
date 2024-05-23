@@ -1,10 +1,15 @@
 cwlVersion: v1.2
 class: CommandLineTool
 
+# baseCommand: ["sh", "-c"]
+# baseCommand:
+
+# arguments:
+#   - "echo 'nameserver 8.8.8.8' > /etc/resolv.conf && python3 /app/ExtractData.py"
+
 hints:
   DockerRequirement:
-    # dockerPull: jslpdcharan/download-files:latest
-    dockerPull: typingliu/download-files:latest
+    dockerPull: charan-download-files:latest
   NetworkAccess:
     networkAccess: true
 
