@@ -4,7 +4,7 @@ class: CommandLineTool
 hints:
   DockerRequirement:
     # dockerPull: jslpdcharan/download-files:latest
-    dockerPull: download-files:latest
+    dockerPull: typingliu/download-files:latest
   NetworkAccess:
     networkAccess: true
 

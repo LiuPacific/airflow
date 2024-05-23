@@ -162,7 +162,7 @@ def generate_dag(workflow_name: str, main_cwl_dict: dict):
     for step_id in main_cwl_dict.get("steps"):
         task_obj = CwlLocalOperator(
             task_id=step_id,  # cwltool echo.cwl.yaml --message_text="hello typing"
-            cwl_file_path=get_cwl_saving_path(workflow_name, "main.cwl"),
+            main_cwl_file_path=get_cwl_saving_path(workflow_name, "main.cwl"),
             cwl_step_to_run=step_id,
             # TODO hara: there will be multiple final step, the one in charge of cleaning
             basedir=get_cwl_saving_dir_path(workflow_name),
@@ -256,10 +256,12 @@ def trigger_cwl():
         trigger_response_dict = request_trigger(dag_id, job_content)
         return jsonify(trigger_response_dict), 200
 
-def unpause_dag(dag_id:  str):
+
+def unpause_dag(dag_id: str):
     url_for_unpause = f"http://localhost:8081/paused?is_paused=true&dag_id={dag_id}"
     response = requests.post(url_for_unpause)
     response.raise_for_status()
+
 
 def request_trigger(dag_id: str, job_content: dict):
     url_for_trigger = f"http://localhost:8081/api/v1/dags/{dag_id}/dagRuns"
@@ -352,6 +354,24 @@ def register_cwl(dag_obj, session: Session = NEW_SESSION):
         session.commit()
 
 
+from airflow.models import DagModel
+
+@blueprint0.route('/dags', methods=['GET'])
+def dags():
+    dags_dict = list_dags(is_active=True)
+    return dags_dict, 200
+
+
+@provide_session
+def list_dags(is_active: bool, session: Session = NEW_SESSION):
+    dags = session.query(DagModel).filter_by(is_active=is_active).all()
+
+    dags_dict = {}
+    for dag in dags:
+        dags_dict[dag.dag_id] = {"is_active": dag.is_active, "is_paused": dag.is_paused, "owner": dag.owners}
+    return dags_dict
+
+
 class MyApiPlugin(AirflowPlugin):
     name = "hara_web_plugin0"
     flask_blueprints = [blueprint0]  # Register the blueprint in the plugin
@@ -363,7 +383,7 @@ def hara_add_dag():
     from airflow.operators.bash import BashOperator
     from airflow.hara.hara_operator.cwl_local_pyoperator import CwlLocalOperator
 
-    cwl_file_path = "/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/hara_dags/cwl_2docker_nodes_dag/main.cwl.yaml"
+    main_cwl_file_path = "/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/hara_dags/cwl_2docker_nodes_dag/main.cwl.yaml"
     job_file_path = "/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/hara_dags/cwl_2docker_nodes_dag/hara_job.yaml"
     basedir = '/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/hara_dags/cwl_2docker_nodes_dag'
     cwl_work_path = '/home/typingliu/temp/'
@@ -386,7 +406,7 @@ def hara_add_dag():
 
         task1 = CwlLocalOperator(
             task_id='task_1',  # cwltool echo.cwl.yaml --message_text="hello typing"
-            cwl_file_path=cwl_file_path,
+            main_cwl_file_path=main_cwl_file_path,
             cwl_step_to_run='writeMessage',
             basedir=basedir,
             job_file_path=job_file_path,
@@ -396,7 +416,7 @@ def hara_add_dag():
 
         task2 = CwlLocalOperator(
             task_id='task_2',  # cwltool echo.cwl.yaml --message_text="hello typing"
-            cwl_file_path=cwl_file_path,
+            main_cwl_file_path=main_cwl_file_path,
             cwl_step_to_run='countWords',
             basedir=basedir,
             job_file_path=job_file_path,

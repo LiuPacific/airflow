@@ -12,7 +12,7 @@ default_args = {
     'retry_delay': timedelta(minutes=2)
 }
 
-cwl_file_path = "/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/hara_dags/cwl_2docker_nodes_dag/main.cwl.yaml"
+main_cwl_file_path = "/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/hara_dags/cwl_2docker_nodes_dag/main.cwl.yaml"
 job_file_path = "/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/hara_dags/cwl_2docker_nodes_dag/hara_job.yaml"
 basedir = '/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/hara_dags/cwl_2docker_nodes_dag'
 cwl_work_path = '/home/typingliu/temp/'
@@ -35,7 +35,7 @@ def create_dag(dag_id, owner, start_date, retry_delay_minutes):
 
     task1 = CwlLocalOperator(
         task_id='task_1',  # cwltool echo.cwl.yaml --message_text="hello typing"
-        cwl_file_path=cwl_file_path,
+        main_cwl_file_path=main_cwl_file_path,
         cwl_step_to_run='writeMessage',
         basedir=basedir,
         job_file_path=job_file_path,
@@ -45,7 +45,7 @@ def create_dag(dag_id, owner, start_date, retry_delay_minutes):
 
     task2 = CwlLocalOperator(
         task_id='task_2',  # cwltool echo.cwl.yaml --message_text="hello typing"
-        cwl_file_path=cwl_file_path,
+        main_cwl_file_path=main_cwl_file_path,
         cwl_step_to_run='countWords',
         basedir=basedir,
         job_file_path=job_file_path,

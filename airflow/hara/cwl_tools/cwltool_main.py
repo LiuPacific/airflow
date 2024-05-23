@@ -23,11 +23,11 @@ def execute_cwl(cwl_file, job_file):
 
 if __name__ == "__main__":
     # Path to your CWL file
-    # cwl_file_path = "/home/typingliu/workspace/tpy/airflow21/airflow/airflow/hara_bin/cwl_tools/echo.cwl.yaml"
-    cwl_file_path = "rw_example/hara_workflow.cwl.yaml"
+    # main_cwl_file_path = "/home/typingliu/workspace/tpy/airflow21/airflow/airflow/hara_bin/cwl_tools/echo.cwl.yaml"
+    main_cwl_file_path = "rw_example/hara_workflow.cwl.yaml"
     # Path to your job file (YAML or JSON format) with input parameters for the workflow
     # job_file_path = "/home/typingliu/workspace/tpy/airflow21/airflow/airflow/hara_bin/cwl_tools/echo.cwl.job.yaml"
     job_file_path = "rw_example/hara_job.yaml"
 
     # Execute the CWL workflow
-    execute_cwl(cwl_file_path, job_file_path)
+    execute_cwl(main_cwl_file_path, job_file_path)

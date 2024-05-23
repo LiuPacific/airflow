@@ -6,8 +6,8 @@ from airflow.hara.cwl_tools.hara_engine import controller, hara_workflow
 from airflow.hara.cwl_tools.config import constants
 from airflow.hara.cwl_tools.tools import cwl_log
 
-def load_cwl_workflow(cwl_file_path) -> dict:
-    with open(cwl_file_path, 'r') as file:
+def load_cwl_workflow(main_cwl_file_path) -> dict:
+    with open(main_cwl_file_path, 'r') as file:
         cwl_workflow = yaml.safe_load(file)
 
     return cwl_workflow
@@ -38,7 +38,8 @@ def execute_cwl1(cwl_file, job_file):
     print("Execution result:", result)
 
 
-def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_process: hara_workflow.HaraWorkflow,
+def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path,
+                workflow_process: hara_workflow.HaraWorkflow,
                 tmpdir_prefix: str,
                 tmp_outdir_prefix: str,
                 stagedir : str,
@@ -50,6 +51,18 @@ def execute_cwl(hara_runtime_context: RuntimeContext, job_file_path, workflow_pr
                 is_separate_mode: bool,
                 job_content: dict
                 ):
+
+    cwl_log.get_cwl_logger().info("tmpdir_prefix: %s", tmpdir_prefix)
+    cwl_log.get_cwl_logger().info("tmp_outdir_prefix: %s", tmp_outdir_prefix)
+    cwl_log.get_cwl_logger().info("stagedir: %s", stagedir)
+    cwl_log.get_cwl_logger().info("outdir: %s", outdir)
+    cwl_log.get_cwl_logger().info("basedir: %s", basedir)
+    cwl_log.get_cwl_logger().info("run_id: %s", run_id)
+    cwl_log.get_cwl_logger().info("file_kv_path: %s", file_kv_path)
+    cwl_log.get_cwl_logger().info("step_to_run: %s", step_to_run)
+    cwl_log.get_cwl_logger().info("is_separate_mode: %s", is_separate_mode)
+    cwl_log.get_cwl_logger().info("job_content: %s", job_content)
+
     runtime_context = hara_runtime_context.copy()
     runtime_context.basedir = basedir
     # runtime_context.outdir = os.getcwd()

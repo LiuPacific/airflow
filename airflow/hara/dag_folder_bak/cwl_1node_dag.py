@@ -10,7 +10,7 @@ default_args = {
     'retry_delay': timedelta(minutes=2)
 }
 
-cwl_file_path = '/airflow/hara/cwl_tools/rw_example/hara_workflow.cwl.yaml'
+main_cwl_file_path = '/airflow/hara/cwl_tools/rw_example/hara_workflow.cwl.yaml'
 job_file_path = '/airflow/hara/cwl_tools/rw_example/hara_job.yaml'
 basedir = '/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/cwl_tools/rw_example'  # cwl file path
 cwl_work_path = '/home/typingliu/temp/'
@@ -30,7 +30,7 @@ with DAG(
 
     task1 = CwlLocalOperator(
         task_id='task_1',  # cwltool echo.cwl.yaml --message_text="hello typing"
-        cwl_file_path=cwl_file_path,
+        main_cwl_file_path=cwl_file_path,
         cwl_step_to_run='writeMessage',
         basedir=basedir,
         job_file_path=job_file_path,

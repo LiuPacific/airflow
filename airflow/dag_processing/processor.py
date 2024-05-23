@@ -812,7 +812,7 @@ def hara_add_dag(hdagbag : DagBag):
     from airflow.operators.bash import BashOperator
     from airflow.hara.hara_operator.cwl_local_pyoperator import CwlLocalOperator
 
-    cwl_file_path = "/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/hara_dags/cwl_2docker_nodes_dag/main.cwl.yaml"
+    main_cwl_file_path = "/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/hara_dags/cwl_2docker_nodes_dag/main.cwl.yaml"
     job_file_path = "/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/hara_dags/cwl_2docker_nodes_dag/hara_job.yaml"
     basedir = '/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/hara_dags/cwl_2docker_nodes_dag'
     cwl_work_path = '/home/typingliu/temp/'
@@ -836,7 +836,7 @@ def hara_add_dag(hdagbag : DagBag):
 
         task1 = CwlLocalOperator(
             task_id='task_1',  # cwltool echo.cwl.yaml --message_text="hello typing"
-            cwl_file_path=cwl_file_path,
+            main_cwl_file_path=main_cwl_file_path,
             cwl_step_to_run='writeMessage',
             basedir=basedir,
             job_file_path=job_file_path,
@@ -846,7 +846,7 @@ def hara_add_dag(hdagbag : DagBag):
 
         task2 = CwlLocalOperator(
             task_id='task_2',  # cwltool echo.cwl.yaml --message_text="hello typing"
-            cwl_file_path=cwl_file_path,
+            main_cwl_file_path=main_cwl_file_path,
             cwl_step_to_run='countWords',
             basedir=basedir,
             job_file_path=job_file_path,

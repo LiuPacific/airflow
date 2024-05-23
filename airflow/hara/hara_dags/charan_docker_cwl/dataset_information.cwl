@@ -4,7 +4,7 @@ class: CommandLineTool
 hints:
   DockerRequirement:
     # dockerPull: jslpdcharan/dataset-metadata:latest
-    dockerPull: dataset-metadata:latest
+    dockerPull: typingliu/dataset-metadata:latest
   NetworkAccess:
     networkAccess: true
 

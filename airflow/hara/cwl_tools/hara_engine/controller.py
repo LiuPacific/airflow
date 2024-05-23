@@ -287,10 +287,7 @@ class HaraCwlEngine:
             )
             process.parent_wf = process.provenance_object
 
-        ## hara changed
-        # jobiter = process.job(job_order_object, self.output_callback, runtime_context)
         jobiter = process.job(job_order_object, self.output_callback, runtime_context)
-        ## hara end
         # cwltool.workflow.Workflow
         try:
             for job in jobiter:

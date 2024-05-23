@@ -82,7 +82,7 @@ class CwlLocalOperator(BaseOperator):
     def __init__(
         self,
         *,
-        cwl_file_path: str,
+        main_cwl_file_path: str,
         cwl_step_to_run: str,
         basedir: str,
         job_file_path: str,
@@ -91,7 +91,7 @@ class CwlLocalOperator(BaseOperator):
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
-        self.cwl_file_path = cwl_file_path
+        self.main_cwl_file_path = main_cwl_file_path
         self.cwl_step_to_run = cwl_step_to_run
         self.basedir = basedir
         self.job_file_path = job_file_path
@@ -112,7 +112,7 @@ class CwlLocalOperator(BaseOperator):
         run_id = context['dag_run'].run_id
         path_safe_run_id = run_id.replace(':', '_').replace(' ', '_').replace('+', '_')
 
-        cwl_file_path = self.cwl_file_path
+        main_cwl_file_path = self.main_cwl_file_path
         job_file_path = self.job_file_path
 
         tmpdir_prefix = os.path.join(self.cwl_work_path, path_safe_run_id, 'tmp_outdir')
@@ -126,15 +126,20 @@ class CwlLocalOperator(BaseOperator):
         cwl_step_to_run = self.cwl_step_to_run
 
         hara_cwl_engine = controller.HaraCwlEngine()
-        workflow_process = hara_cwl_engine.load_configuration(cwl_file_path)
+        workflow_process = hara_cwl_engine.load_configuration(main_cwl_file_path)
 
 
         # TODO hara: host network
+
+
+        cwl_log.get_cwl_logger().info("-----execute cwl with the these parameters")
+        cwl_log.get_cwl_logger().info("main_cwl_file_path: %s", main_cwl_file_path)
         return_value = hara_cwl_entry.execute_cwl(hara_cwl_engine.h_runtime_context, job_file_path,
                                                   workflow_process=workflow_process,
                                                   tmpdir_prefix=tmpdir_prefix,
                                                   tmp_outdir_prefix=tmp_outdir_prefix,
-                                                  stagedir=stagedir, outdir=outdir,
+                                                  stagedir=stagedir,
+                                                  outdir=outdir,
                                                   basedir=basedir,
                                                   run_id=path_safe_run_id,
                                                   file_kv_path=file_kv_path,
