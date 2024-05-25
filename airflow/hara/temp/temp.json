@@ -1,0 +1,14 @@
+{
+    "tmp_outdird2f3v6mo": {},
+    "tmp_outdirbmkhe6gg": {},
+    "tmp_outdir": {
+        "dataset_extraction_1": {
+            "bugr-bbfr.csv": "/manual__2024-05-24T19_17_40.498411_00_00/tmp_outdir/dataset_extraction_1/bugr-bbfr.csv"
+        }
+    },
+    "outdir": {
+        "error.log": "/manual__2024-05-24T19_17_40.498411_00_00/outdir/error.log",
+        "stdout.log": "/manual__2024-05-24T19_17_40.498411_00_00/outdir/stdout.log"
+    },
+    "hara_kv_db.json": "/manual__2024-05-24T19_17_40.498411_00_00/hara_kv_db.json"
+}

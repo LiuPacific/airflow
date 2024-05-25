@@ -17,18 +17,15 @@
 # under the License.
 from __future__ import annotations
 
-from typing import Any, Mapping, Sequence
-
-import yaml
+from typing import Any, Mapping
 
 from airflow.hara.cwl_tools import hara_cwl_entry
 from airflow.hara.cwl_tools.tools import cwl_log
-from airflow.hara.cwl_tools.config import constants
+from airflow.hara.common_tools import path_tools
 from airflow.hara.cwl_tools.hara_engine import controller
 from airflow.models.baseoperator import BaseOperator
-from airflow.utils.context import Context
 from airflow.utils.operator_helpers import KeywordParameters
-from airflow.utils.context import Context, context_copy_partial, context_merge
+from airflow.utils.context import Context
 import os
 
 
@@ -110,7 +107,8 @@ class CwlLocalOperator(BaseOperator):
             cwl_log.get_cwl_logger().info("-----job_content type: %s", type(job_content)) # dict
 
         run_id = context['dag_run'].run_id
-        path_safe_run_id = run_id.replace(':', '_').replace(' ', '_').replace('+', '_')
+        # path_safe_run_id = run_id.replace(':', '_').replace(' ', '_').replace('+', '_')
+        path_safe_run_id = path_tools.convert_to_valid_filename(run_id)
 
         main_cwl_file_path = self.main_cwl_file_path
         job_file_path = self.job_file_path

@@ -21,7 +21,14 @@ blueprint0 = Blueprint(
     url_prefix='/hara_pre'  # URL prefix for all the endpoints in this blueprint
 )
 
-print("aa")
+@blueprint0.after_request
+def add_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, DELETE, PUT'
+    response.headers['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+    return response
+
+print("hara_web_plugin0 start")
 
 
 # Define an endpoint
