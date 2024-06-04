@@ -1,0 +1,62 @@
+cwlVersion: v1.2
+class: Workflow
+id: main_workflow_2sfca
+hints:
+  ResourceRequirement:
+    ramMin: 2048
+    coresMin: 2
+label: main workflow for calculating 2sfca
+steps:
+  downloading_od:
+    run: ./S3_downloading/s3_downloading.cwl.yaml
+    in:
+      bucket_name: bucket_name_for_step_downloading_od
+      object_name: od_name_for_step_downloading_od
+    out:
+      - downloaded_file
+  downloading_zip_geo:
+    run: ./S3_downloading/s3_downloading.cwl.yaml
+    in:
+      bucket_name: bucket_name_for_step_downloading_zip_geo
+      object_name: zip_geo_name_for_step_downloading_zip_geo
+    out:
+      - downloaded_file
+  function_2sfca:
+    run: ./function_2sfca/function_2sfca.cwl.yaml
+    in:
+      accessibility_file_path: downloading_od/downloaded_file
+      zip_physician_file_path: downloading_zip_geo/downloaded_file
+      gauss_upper_limit: gauss_upper_limit_for_step_function_2sfca
+    out:
+      - geojson_output
+      - score_output
+  visualizing_geojson:
+    run: ./visualizing_geojson/visualizing_geojson.cwl.yaml
+    in:
+      source_geojson_file_path: function_2sfca/geojson_output
+      column_name_to_show: column_name_to_show_for_step_visualizing_geojson
+    out:
+      - png_output
+inputs:
+  bucket_name_for_step_downloading_od: string
+  od_name_for_step_downloading_od: string
+  bucket_name_for_step_downloading_zip_geo: string
+  zip_geo_name_for_step_downloading_zip_geo: string
+  gauss_upper_limit_for_step_function_2sfca: int
+  column_name_to_show_for_step_visualizing_geojson: string
+outputs:
+  function_2sfca_score:
+    type: File
+    outputSource: function_2sfca/score_output
+  function_2sfca_geodata:
+    type: File
+    outputSource: function_2sfca/geojson_output
+  visualizing_geojson_img:
+    type: File
+    outputSource: visualizing_geojson/png_output
+
+"$namespaces":
+  author: team
+  website_name: workflow-engine
+
+# cwltool --custom-net=host main.cwl.yaml job.yaml

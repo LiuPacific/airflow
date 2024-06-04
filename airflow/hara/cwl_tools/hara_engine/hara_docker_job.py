@@ -356,6 +356,9 @@ class HaraDockerCommandLineJob(ContainerCommandLineJob):
             if not runtimeContext.no_read_only:
                 runtime.append("--read-only=true")
 
+            # hara change starts:
+            runtimeContext.custom_net = "host"
+            # hara change ends;
             if self.networkaccess:
                 if runtimeContext.custom_net:
                     runtime.append(f"--net={runtimeContext.custom_net}")

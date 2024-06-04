@@ -16,7 +16,7 @@ def download_file(url):
 if __name__ == "__main__":
     print("arguments passed to the script are :", sys.argv)
     if len(sys.argv) != 2:
-        print("Usage: python download_files.py <URL>")
+        print("downloading url is required")
         sys.exit(1)
 
     url = sys.argv[1]

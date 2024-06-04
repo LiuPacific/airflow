@@ -17,7 +17,7 @@ import yaml
 import os
 
 # Define the blueprint
-blueprint0 = Blueprint(
+blueprint_file = Blueprint(
     'hara_file_blueprint',  # Name of the blueprint
     __name__,  # The name of the module where the blueprint is located
     url_prefix='/osu/file'  # URL prefix for all the endpoints in this blueprint
@@ -26,10 +26,20 @@ blueprint0 = Blueprint(
 
 class HaraFileApiPlugin(AirflowPlugin):
     name = "hara_web_plugin_files"
-    flask_blueprints = [blueprint0]  # Register the blueprint in the plugin
+    flask_blueprints = [blueprint_file]  # Register the blueprint in the plugin
+
+@blueprint_file.after_request
+def add_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, DELETE, PUT'
+    response.headers['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+    return response
+
+print("hara_web_plugin0 start")
 
 
-@blueprint0.route('/get_result_output_files', methods=['GET'])
+
+@blueprint_file.route('/get_result_output_files', methods=['GET'])
 def get_result_output_files():
     '''
     input dag_run id

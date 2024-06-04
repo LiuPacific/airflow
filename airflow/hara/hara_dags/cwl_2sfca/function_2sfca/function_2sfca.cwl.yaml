@@ -1,0 +1,35 @@
+cwlVersion: v1.2
+class: CommandLineTool
+
+
+hints:
+  DockerRequirement:
+    dockerPull: function_2sfca
+  NetworkAccess:
+    networkAccess: true
+
+inputs:
+  accessibility_file_path:
+    type: File
+    inputBinding:
+      position: 1
+  zip_physician_file_path:
+    type: File
+    inputBinding:
+      position: 2
+  gauss_upper_limit:
+    type: int
+    inputBinding:
+      position: 3
+
+outputs:
+  geojson_output:
+    type: File
+    outputBinding:
+      glob: "*.geojson"
+  score_output:
+    type: File
+    outputBinding:
+      glob: "*.csv"
+
+# cwltool --custom-net=host function_2sfca.cwl.yaml job.yaml
