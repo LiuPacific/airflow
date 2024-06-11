@@ -3,24 +3,33 @@ import geopandas
 import numpy
 import sys, os
 
+# def get_Gaussian(x):
+#     global gauss_upper_limit
+#     if gauss_upper_limit == 0:
+#         return 1
+#
+#     if x <= gauss_upper_limit:
+#         G = (numpy.exp(-0.5 * (x / gauss_upper_limit) ** 2) - numpy.exp(-0.5)) / (1 - numpy.exp(-0.5))
+#         return G
+#     else:
+#         return 0
+
+def get_graded(x):
+    if x < 900/60:  # 0-15
+        return 1
+    if x < 1800/60:  # 15-30
+        return 0.9
+    elif x < 2700/60:  # 30-45
+        return 0.56
+    elif x < 3600/60:  # 45-60
+        return 0.23
+    else:
+        return 0
 
 def phy_10000(num: int) -> int:
     return num * 10000
 
 
-def get_Gaussian(x):
-    global gauss_upper_limit
-    if gauss_upper_limit == 0:
-        if x < 60:
-            return 1
-        else:
-            return 0
-
-    if x <= gauss_upper_limit:
-        G = (numpy.exp(-0.5 * (x / gauss_upper_limit) ** 2) - numpy.exp(-0.5)) / (1 - numpy.exp(-0.5))
-        return G
-    else:
-        return 0
 
 
 def get_Rj(x: pandas.core.frame.DataFrame):
@@ -28,7 +37,7 @@ def get_Rj(x: pandas.core.frame.DataFrame):
     Sj = x['d_physician1000'][0]
     dt = 0
     for i in range(len(x)):
-        vl = x['d_population'][i] * get_Gaussian(x['EstTime'][i])
+        vl = x['d_population'][i] * get_graded(x['EstTime'][i])
         dt += vl
     if Sj == 0:
         return 0
@@ -43,7 +52,7 @@ def get_Ai(x: pandas.core.frame.DataFrame):
     for i in range(len(x)):
         if x['d_Rj'][i] == None:
             print("vl none1")
-        vl = x['d_Rj'][i] * get_Gaussian(x['EstTime'][i])
+        vl = x['d_Rj'][i] * get_graded(x['EstTime'][i])
         # vl = x['d_Rj'][i]
         if vl == None:
             print("vl none")
@@ -190,8 +199,8 @@ def init_relation():
 
 if __name__ == '__main__':
     print("arguments passed to the script are :", sys.argv)
-    if len(sys.argv) < 4:
-        print("3 parameters are required")
+    if len(sys.argv) < 3:
+        print("2 parameters are required")
         sys.exit(1)
 
     # accessibility_file_path = r"/home/typingliu/project/ok_od_travel_3hour.csv"
@@ -199,11 +208,11 @@ if __name__ == '__main__':
     # zip_physician_file_path = r"/home/typingliu/project/zip_shp/ok_zip_acc.geojson"
     zip_physician_file_path = sys.argv[2]
     # gauss_upper_limit = 60
-    gauss_upper_limit = int(sys.argv[3])
+    # gauss_upper_limit = int(sys.argv[3])
 
-    output_base_filename = 'gauss_result'
-    if gauss_upper_limit == 0:
-        output_base_filename = 'normal_result'
+    output_base_filename = 'e2sfca_result'
+    # if gauss_upper_limit == 0:
+    #     output_base_filename = 'normal_result'
 
     zipcode_accessibility = pandas.core.frame.DataFrame()
 

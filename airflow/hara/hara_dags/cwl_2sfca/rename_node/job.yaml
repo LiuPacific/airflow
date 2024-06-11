@@ -1,0 +1,5 @@
+file_to_rename:
+  class: File
+  path: "./a.txt"
+
+new_filename: "b.txt"

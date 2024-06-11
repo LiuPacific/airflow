@@ -350,7 +350,7 @@ def task_run(args, dag=None):
                 f"You provided the option {unsupported_flags}. "
                 "Delete it to execute the command."
             )
-    # hara change starts
+    # hara change starts:  Allow --pickle
     # if dag and args.pickle:
     #     raise AirflowException("You cannot use the --pickle option when using DAG.cli() method.")
     # hara change ends
@@ -379,7 +379,7 @@ def task_run(args, dag=None):
         print(f"Loading pickle id: {args.pickle}")
         dag = get_dag_by_pickle(args.pickle)
     elif not dag:
-        # hara change starts:
+        # hara change starts: get pickled dag to execute, instead of getting dag from dag_dir.
         # dag = get_dag(args.subdir, args.dag_id)
 
         from airflow.utils.cli import get_pickled_dag_by_dag_id

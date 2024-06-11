@@ -9,7 +9,7 @@ class: CommandLineTool
 
 hints:
   DockerRequirement:
-    dockerPull: s3_downloading
+    dockerPull: typingliu/s3_downloading:latest
   NetworkAccess:
     networkAccess: true
 

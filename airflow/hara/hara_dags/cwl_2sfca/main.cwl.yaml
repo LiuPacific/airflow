@@ -21,6 +21,10 @@ steps:
       object_name: zip_geo_name_for_step_downloading_zip_geo
     out:
       - downloaded_file
+
+
+
+
   function_2sfca:
     run: ./function_2sfca/function_2sfca.cwl.yaml
     in:
@@ -30,20 +34,103 @@ steps:
     out:
       - geojson_output
       - score_output
-  visualizing_geojson:
+  visualizing_2sfca_geojson:
     run: ./visualizing_geojson/visualizing_geojson.cwl.yaml
     in:
       source_geojson_file_path: function_2sfca/geojson_output
-      column_name_to_show: column_name_to_show_for_step_visualizing_geojson
+      column_name_to_show: column_name_to_show_for_step_visualizing_2sfca_geojson
     out:
       - png_output
+  rename_2sfca_png:
+    run: ./rename_node/rename.cwl.yaml
+    in:
+      file_to_rename: visualizing_2sfca_geojson/png_output
+      new_filename: new_filename_for_step_rename_2sfca_png
+    out:
+      - renamed_output
+
+
+
+
+
+  function_g2sfca:
+    run: ./function_2sfca/function_2sfca.cwl.yaml
+    in:
+      accessibility_file_path: downloading_od/downloaded_file
+      zip_physician_file_path: downloading_zip_geo/downloaded_file
+      gauss_upper_limit: gauss_upper_limit_for_step_function_g2sfca
+    out:
+      - geojson_output
+      - score_output
+  visualizing_g2sfca_geojson:
+    run: ./visualizing_geojson/visualizing_geojson.cwl.yaml
+    in:
+      source_geojson_file_path: function_g2sfca/geojson_output
+      column_name_to_show: column_name_to_show_for_step_visualizing_g2sfca_geojson
+    out:
+      - png_output
+  rename_g2sfca_png:
+    run: ./rename_node/rename.cwl.yaml
+    in:
+      file_to_rename: visualizing_g2sfca_geojson/png_output
+      new_filename: new_filename_for_step_rename_g2sfca_png
+    out:
+      - renamed_output
+
+
+  function_e2sfca:
+    run: ./function_e2sfca/function_e2sfca.cwl.yaml
+    in:
+      accessibility_file_path: downloading_od/downloaded_file
+      zip_physician_file_path: downloading_zip_geo/downloaded_file
+    out:
+      - geojson_output
+      - score_output
+  visualizing_e2sfca_geojson:
+    run: ./visualizing_geojson/visualizing_geojson.cwl.yaml
+    in:
+      source_geojson_file_path: function_e2sfca/geojson_output
+      column_name_to_show: column_name_to_show_for_step_visualizing_e2sfca_geojson
+    out:
+      - png_output
+  rename_e2sfca_png:
+    run: ./rename_node/rename.cwl.yaml
+    in:
+      file_to_rename: visualizing_e2sfca_geojson/png_output
+      new_filename: new_filename_for_step_rename_e2sfca_png
+    out:
+      - renamed_output
+
+
+
+
 inputs:
   bucket_name_for_step_downloading_od: string
   od_name_for_step_downloading_od: string
   bucket_name_for_step_downloading_zip_geo: string
   zip_geo_name_for_step_downloading_zip_geo: string
-  gauss_upper_limit_for_step_function_2sfca: int
-  column_name_to_show_for_step_visualizing_geojson: string
+
+  gauss_upper_limit_for_step_function_2sfca:
+    type: int
+    default: 0
+  column_name_to_show_for_step_visualizing_2sfca_geojson: string
+  new_filename_for_step_rename_2sfca_png:
+    type: string
+    default: "2sfca.png"
+
+  gauss_upper_limit_for_step_function_g2sfca: int
+  column_name_to_show_for_step_visualizing_g2sfca_geojson: string
+  new_filename_for_step_rename_g2sfca_png:
+    type: string
+    default: "g2sfca.png"
+
+
+  column_name_to_show_for_step_visualizing_e2sfca_geojson: string
+  new_filename_for_step_rename_e2sfca_png:
+    type: string
+    default: "e2sfca.png"
+
+
 outputs:
   function_2sfca_score:
     type: File
@@ -51,9 +138,43 @@ outputs:
   function_2sfca_geodata:
     type: File
     outputSource: function_2sfca/geojson_output
-  visualizing_geojson_img:
+  #  visualizing_2sfca_geojson_img:
+  #    type: File
+  #    outputSource: visualizing_2sfca_geojson/png_output
+  renamed_2sfca_png:
     type: File
-    outputSource: visualizing_geojson/png_output
+    outputSource: rename_2sfca_png/renamed_output
+
+
+  function_g2sfca_score:
+    type: File
+    outputSource: function_g2sfca/score_output
+  function_g2sfca_geodata:
+    type: File
+    outputSource: function_g2sfca/geojson_output
+  #  visualizing_g2sfca_geojson_img:
+  #    type: File
+  #    outputSource: visualizing_g2sfca_geojson/png_output
+  renamed_g2sfca_png:
+    type: File
+    outputSource: rename_g2sfca_png/renamed_output
+
+
+  function_e2sfca_score:
+    type: File
+    outputSource: function_e2sfca/score_output
+  function_e2sfca_geodata:
+    type: File
+    outputSource: function_e2sfca/geojson_output
+  #  visualizing_e2sfca_geojson_img:
+  #    type: File
+  #    outputSource: visualizing_e2sfca_geojson/png_output
+  renamed_e2sfca_png:
+    type: File
+    outputSource: rename_e2sfca_png/renamed_output
+
+
+
 
 "$namespaces":
   author: team

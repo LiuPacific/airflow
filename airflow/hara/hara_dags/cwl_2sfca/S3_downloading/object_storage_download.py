@@ -25,7 +25,7 @@ if __name__ == '__main__':
     # /home/typingliu/.conda/envs/airflow25_dev/bin/python /home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/hara_dags/cwl_2sfca/S3_downloading/object_storage_download.py osu-geohealth ok_od_travel_3hour.csv
     # arguments passed to the script are : ['/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/hara_dags/cwl_2sfca/S3_downloading/object_storage_download.py', 'osu-geohealth', 'ok_od_travel_3hour.csv']
     print("arguments passed to the script are :", sys.argv)
-    if len(sys.argv) != 3:
+    if len(sys.argv) < 3:
         print("2 parameters are required")
         sys.exit(1)
 

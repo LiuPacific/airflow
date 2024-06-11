@@ -227,6 +227,9 @@ def get_dag(subdir: str | None, dag_id: str) -> DAG:
         fallback_path = _search_for_dag_file(subdir) or settings.DAGS_FOLDER
         logger.warning("Dag %r not found in path %s; trying path %s", dag_id, first_path, fallback_path)
         dagbag = DagBag(dag_folder=fallback_path)
+        # hara change starts: add dags into dagbag.dags
+
+        # hara change ends;
         if dag_id not in dagbag.dags:
             raise AirflowException(
                 f"Dag {dag_id!r} could not be found; either it does not exist or it failed to parse."

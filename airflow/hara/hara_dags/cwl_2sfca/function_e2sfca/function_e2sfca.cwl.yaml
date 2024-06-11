@@ -4,7 +4,7 @@ class: CommandLineTool
 
 hints:
   DockerRequirement:
-    dockerPull: typingliu/function_2sfca:latest
+    dockerPull: typingliu/function_e2sfca:latest
   NetworkAccess:
     networkAccess: true
 
@@ -17,10 +17,6 @@ inputs:
     type: File
     inputBinding:
       position: 2
-  gauss_upper_limit:
-    type: int
-    inputBinding:
-      position: 3
 
 outputs:
   geojson_output:
@@ -32,4 +28,4 @@ outputs:
     outputBinding:
       glob: "*.csv"
 
-# cwltool --custom-net=host function_2sfca.cwl.yaml job.yaml
+# cwltool --custom-net=host function_e2sfca.cwl.yaml job.yaml
