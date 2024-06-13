@@ -9,11 +9,11 @@ hints:
     networkAccess: true
 
 inputs:
-  accessibility_file_path:
+  travel_time_cost_data:
     type: File
     inputBinding:
       position: 1
-  zip_physician_file_path:
+  physician_data:
     type: File
     inputBinding:
       position: 2

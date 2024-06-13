@@ -251,14 +251,68 @@ class DagBag(LoggingMixin):
                 del self.dags[dag_id]
         return self.dags.get(dag_id)
 
+    # hara change starts: get_dag to get_hara_serialized_dag
+    @provide_session
+    def get_hara_serialized_dag(self, dag_id, session: Session = None):
+        """
+        Gets the DAG out of the dictionary, and refreshes it if expired
+
+        :param dag_id: DAG ID
+        """
+        # Avoid circular import
+        from airflow.models.dag import DagModel
+
+        # Import here so that serialized dag is only imported when serialization is enabled
+        from airflow.models.hara_serialized_dag import HaraSerializedDagModel
+
+        if dag_id not in self.dags:
+            # Load from DB if not (yet) in the bag
+            self._add_dag_from_db(dag_id=dag_id, session=session)
+            return self.dags.get(dag_id)
+
+        # TODO hara: detect change of hara_serialized_dag and sync the dag into dag table. But initiatively when things are changed.
+        # # If DAG is in the DagBag, check the following
+        # # 1. if time has come to check if DAG is updated (controlled by min_serialized_dag_fetch_secs)
+        # # 2. check the last_updated column in SerializedDag table to see if Serialized DAG is updated
+        # # 3. if (2) is yes, fetch the Serialized DAG.
+        # # 4. if (2) returns None (i.e. Serialized DAG is deleted), remove dag from dagbag
+        # # if it exists and return None.
+        # min_serialized_dag_fetch_secs = timedelta(seconds=settings.MIN_SERIALIZED_DAG_FETCH_INTERVAL)
+        # if (
+        #     dag_id in self.dags_last_fetched
+        #     and timezone.utcnow() > self.dags_last_fetched[dag_id] + min_serialized_dag_fetch_secs
+        # ):
+        #     sd_last_updated_datetime = HaraSerializedDagModel.get_last_updated_datetime(
+        #         dag_id=dag_id,
+        #         session=session,
+        #     )
+        #     if not sd_last_updated_datetime:
+        #         self.log.warning("Serialized DAG %s no longer exists", dag_id)
+        #         del self.dags[dag_id]
+        #         del self.dags_last_fetched[dag_id]
+        #         del self.dags_hash[dag_id]
+        #         return None
+        #
+        #     if sd_last_updated_datetime > self.dags_last_fetched[dag_id]:
+        #         self._add_dag_from_db(dag_id=dag_id, session=session)
+
+        return self.dags.get(dag_id)
+
+    # hara change ends;
+
     def _add_dag_from_db(self, dag_id: str, session: Session):
         """Add DAG to DagBag from DB"""
+        # hara change starts: add dag from hara_serialized_dag
         from airflow.models.serialized_dag import SerializedDagModel
+        from airflow.models.hara_serialized_dag import HaraSerializedDagModel
 
         row = SerializedDagModel.get(dag_id, session)
+        row2 = HaraSerializedDagModel.get(dag_id, session)
+        if row2 is not None:
+            row = row2
         if not row:
             return None
-
+        # hara change ends
         row.load_op_links = self.load_op_links
         dag = row.dag
         for subdag in dag.subdags:
@@ -608,6 +662,7 @@ class DagBag(LoggingMixin):
         # To avoid circular import - airflow.models.dagbag -> airflow.models.dag -> airflow.models.dagbag
         from airflow.models.dag import DAG
         from airflow.models.serialized_dag import SerializedDagModel
+        from airflow.models.hara_serialized_dag import HaraSerializedDagModel
 
         def _serialize_dag_capturing_errors(dag, session):
             """
@@ -626,6 +681,12 @@ class DagBag(LoggingMixin):
                 )
                 if dag_was_updated:
                     self._sync_perm_for_dag(dag, session=session)
+                # hara change starts: upsert dag to hara_serialized_dag
+                HaraSerializedDagModel.write_dag(
+                    dag,
+                    session=session,
+                )
+                # hara change ends;
                 return []
             except OperationalError:
                 raise
@@ -673,11 +734,11 @@ class DagBag(LoggingMixin):
             for permission_name in DAG_ACTIONS:
                 if not (
                     session.query(Permission)
-                    .join(Action)
-                    .join(Resource)
-                    .filter(Action.name == permission_name)
-                    .filter(Resource.name == dag_resource_name)
-                    .one_or_none()
+                        .join(Action)
+                        .join(Resource)
+                        .filter(Action.name == permission_name)
+                        .filter(Resource.name == dag_resource_name)
+                        .one_or_none()
                 ):
                     return True
             return False

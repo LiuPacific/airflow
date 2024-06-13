@@ -223,14 +223,21 @@ def get_dag(subdir: str | None, dag_id: str) -> DAG:
 
     first_path = process_subdir(subdir)
     dagbag = DagBag(first_path)
+
     if dag_id not in dagbag.dags:
         fallback_path = _search_for_dag_file(subdir) or settings.DAGS_FOLDER
         logger.warning("Dag %r not found in path %s; trying path %s", dag_id, first_path, fallback_path)
         dagbag = DagBag(dag_folder=fallback_path)
-        # hara change starts: add dags into dagbag.dags
 
-        # hara change ends;
         if dag_id not in dagbag.dags:
+            # hara change starts: if the dag doesn't exist in dagbag, check from hara_serialized_dag
+            dag = dagbag.get_hara_serialized_dag(dag_id)
+            if dag is not None:
+                return dag
+            dag = dagbag.get_hara_serialized_dag(dag_id)
+            if dag is not None:
+                return dag
+            # hara change ends;
             raise AirflowException(
                 f"Dag {dag_id!r} could not be found; either it does not exist or it failed to parse."
             )
@@ -263,6 +270,13 @@ def get_dag_by_pickle(pickle_id, session=None):
         raise AirflowException(f"pickle_id could not be found in DagPickle.id list: {pickle_id}")
     pickle_dag = dag_pickle.pickle
     return pickle_dag
+
+def get_dag_by_hara_serialized_dag(dag_id: str, session=None):
+    from airflow.models import DagBag
+
+    dagbag = DagBag()
+    dag = dagbag.get_hara_serialized_dag(dag_id)
+    return dag
 
 # hara change starts:
 @provide_session

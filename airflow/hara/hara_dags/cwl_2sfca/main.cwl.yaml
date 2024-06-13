@@ -28,9 +28,9 @@ steps:
   function_2sfca:
     run: ./function_2sfca/function_2sfca.cwl.yaml
     in:
-      accessibility_file_path: downloading_od/downloaded_file
-      zip_physician_file_path: downloading_zip_geo/downloaded_file
-      gauss_upper_limit: gauss_upper_limit_for_step_function_2sfca
+      travel_time_cost_data: downloading_od/downloaded_file
+      physician_data: downloading_zip_geo/downloaded_file
+      max_travel_cost: gauss_upper_limit_for_step_function_2sfca
     out:
       - geojson_output
       - score_output
@@ -56,9 +56,9 @@ steps:
   function_g2sfca:
     run: ./function_2sfca/function_2sfca.cwl.yaml
     in:
-      accessibility_file_path: downloading_od/downloaded_file
-      zip_physician_file_path: downloading_zip_geo/downloaded_file
-      gauss_upper_limit: gauss_upper_limit_for_step_function_g2sfca
+      travel_time_cost_data: downloading_od/downloaded_file
+      physician_data: downloading_zip_geo/downloaded_file
+      max_travel_cost: gauss_upper_limit_for_step_function_g2sfca
     out:
       - geojson_output
       - score_output
@@ -81,8 +81,8 @@ steps:
   function_e2sfca:
     run: ./function_e2sfca/function_e2sfca.cwl.yaml
     in:
-      accessibility_file_path: downloading_od/downloaded_file
-      zip_physician_file_path: downloading_zip_geo/downloaded_file
+      travel_time_cost_data: downloading_od/downloaded_file
+      physician_data: downloading_zip_geo/downloaded_file
     out:
       - geojson_output
       - score_output

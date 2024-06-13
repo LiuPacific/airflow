@@ -3,6 +3,7 @@ import time
 import requests
 import sys
 
+print("aa")
 
 def download_file(url):
     response = requests.get(url)
