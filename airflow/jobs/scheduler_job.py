@@ -771,7 +771,9 @@ class SchedulerJob(BaseJob):
                     self.log.info(
                         "Deactivating DAGs that haven't been touched since %s", execute_start_time.isoformat()
                     )
-                    DAG.deactivate_stale_dags(execute_start_time)
+                    # hara change starts: cancel the logic of deactivating dags by dag_file detection: since the mechanism of deleting dags is no longer relied on dag file detection
+                    # DAG.deactivate_stale_dags(execute_start_time)
+                    # hara change ends;
 
             settings.Session.remove()  # type: ignore
         except Exception:

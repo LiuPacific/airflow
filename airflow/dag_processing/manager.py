@@ -605,7 +605,10 @@ class DagFileProcessorManager(LoggingMixin):
 
             if self.standalone_dag_processor:
                 self._fetch_callbacks(max_callbacks_per_loop)
-            self._deactivate_stale_dags()
+
+            # hara change starts: cancel the logic of deactivating dag based on dag files: since our logic is not relied on file detection.
+            # self._deactivate_stale_dags()
+            # hara change ends;
             DagWarning.purge_inactive_dag_warnings()
             refreshed_dag_dir = self._refresh_dag_dir()
 
@@ -769,7 +772,10 @@ class DagFileProcessorManager(LoggingMixin):
                 alive_dag_filelocs=dag_filelocs,
                 processor_subdir=self.get_dag_directory(),
             )
-            DagModel.deactivate_deleted_dags(self._file_paths)
+
+            # hara change starts: don't deactivate dags which are not in dag_folder: since our dag is not relied on dag_folder detection.
+            # DagModel.deactivate_deleted_dags(self._file_paths)
+            # hara change ends;
 
             from airflow.models.dagcode import DagCode
 
