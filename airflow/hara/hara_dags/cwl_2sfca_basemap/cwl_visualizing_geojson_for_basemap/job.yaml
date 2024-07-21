@@ -1,0 +1,7 @@
+script_to_run:
+  class: File
+  path: "render.py"
+source_geojson_file_path:
+  class: File
+  path: "./.data/idw_shape_data.geojson"
+column_name_to_show: "MEAN_TAVG"

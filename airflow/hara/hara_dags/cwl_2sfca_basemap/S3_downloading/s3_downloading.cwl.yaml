@@ -1,0 +1,34 @@
+cwlVersion: v1.2
+class: CommandLineTool
+
+# baseCommand: ["sh", "-c"]
+# baseCommand:
+
+# arguments:
+#   - "echo 'nameserver 8.8.8.8' > /etc/resolv.conf && python3 /app/ExtractData.py"
+
+hints:
+  DockerRequirement:
+    dockerPull: typingliu/s3_downloading:latest
+  NetworkAccess:
+    networkAccess: true
+
+
+inputs:
+  bucket_name:
+    type: string
+    inputBinding:
+      position: 1
+  object_name:
+    type: string
+    inputBinding:
+      position: 2
+
+outputs:
+  downloaded_file:
+    type: File
+    outputBinding:
+#      glob: "*.csv"
+      glob: "*"
+
+# cwltool --custom-net=host s3_downloading.cwl.yaml job.yaml
