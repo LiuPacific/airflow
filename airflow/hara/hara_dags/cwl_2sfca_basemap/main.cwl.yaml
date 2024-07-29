@@ -39,26 +39,28 @@ steps:
     in:
       source_geojson_file_path: function_2sfca/geojson_output
       column_name_to_show: column_name_to_show_for_step_visualizing_2sfca_geojson
+      output_png_file_name: output_png_file_name_for_step_visualizing_2sfca_geojson
+      output_boundingbox_file_name: output_boundingbox_file_name_for_step_visualizing_2sfca_geojson
     out:
       - png_output
+      - boundingbox_output
       - lon_left
       - lat_bottom
       - lon_right
       - lat_top
-
   debug_print_float:
     run: ./debug_node/debug_show_float.cwl.yaml
     in:
       input_float: visualizing_2sfca_geojson/lat_bottom
     out: []
 
-  rename_2sfca_png:
-    run: ./rename_node/rename.cwl.yaml
-    in:
-      file_to_rename: visualizing_2sfca_geojson/png_output
-      new_filename: new_filename_for_step_rename_2sfca_png
-    out:
-      - renamed_output
+#  rename_2sfca_png:
+#    run: ./rename_node/rename.cwl.yaml
+#    in:
+#      file_to_rename: visualizing_2sfca_geojson/png_output
+#      new_filename: new_filename_for_step_rename_2sfca_png
+#    out:
+#      - renamed_output
 
 
 
@@ -78,19 +80,22 @@ steps:
     in:
       source_geojson_file_path: function_g2sfca/geojson_output
       column_name_to_show: column_name_to_show_for_step_visualizing_g2sfca_geojson
+      output_png_file_name: output_png_file_name_for_step_visualizing_g2sfca_geojson
+      output_boundingbox_file_name: output_boundingbox_file_name_for_step_visualizing_g2sfca_geojson
     out:
       - png_output
+      - boundingbox_output
       - lon_left
       - lat_bottom
       - lon_right
       - lat_top
-  rename_g2sfca_png:
-    run: ./rename_node/rename.cwl.yaml
-    in:
-      file_to_rename: visualizing_g2sfca_geojson/png_output
-      new_filename: new_filename_for_step_rename_g2sfca_png
-    out:
-      - renamed_output
+#  rename_g2sfca_png:
+#    run: ./rename_node/rename.cwl.yaml
+#    in:
+#      file_to_rename: visualizing_g2sfca_geojson/png_output
+#      new_filename: new_filename_for_step_rename_g2sfca_png
+#    out:
+#      - renamed_output
 
 
   function_e2sfca:
@@ -106,19 +111,22 @@ steps:
     in:
       source_geojson_file_path: function_e2sfca/geojson_output
       column_name_to_show: column_name_to_show_for_step_visualizing_e2sfca_geojson
+      output_png_file_name: output_png_file_name_for_step_visualizing_e2sfca_geojson
+      output_boundingbox_file_name: output_boundingbox_file_name_for_step_visualizing_e2sfca_geojson
     out:
       - png_output
+      - boundingbox_output
       - lon_left
       - lat_bottom
       - lon_right
       - lat_top
-  rename_e2sfca_png:
-    run: ./rename_node/rename.cwl.yaml
-    in:
-      file_to_rename: visualizing_e2sfca_geojson/png_output
-      new_filename: new_filename_for_step_rename_e2sfca_png
-    out:
-      - renamed_output
+#  rename_e2sfca_png:
+#    run: ./rename_node/rename.cwl.yaml
+#    in:
+#      file_to_rename: visualizing_e2sfca_geojson/png_output
+#      new_filename: new_filename_for_step_rename_e2sfca_png
+#    out:
+#      - renamed_output
 
 
 
@@ -133,21 +141,30 @@ inputs:
     type: int
     default: 0
   column_name_to_show_for_step_visualizing_2sfca_geojson: string
-  new_filename_for_step_rename_2sfca_png:
+  output_png_file_name_for_step_visualizing_2sfca_geojson:
     type: string
     default: "2sfca.png"
+  output_boundingbox_file_name_for_step_visualizing_2sfca_geojson:
+    type: string
+    default: "boundingbox_2sfca.json"
 
   gauss_upper_limit_for_step_function_g2sfca: int
   column_name_to_show_for_step_visualizing_g2sfca_geojson: string
-  new_filename_for_step_rename_g2sfca_png:
+  output_png_file_name_for_step_visualizing_g2sfca_geojson:
     type: string
     default: "g2sfca.png"
+  output_boundingbox_file_name_for_step_visualizing_g2sfca_geojson:
+    type: string
+    default: "boundingbox_g2sfca.json"
 
 
   column_name_to_show_for_step_visualizing_e2sfca_geojson: string
-  new_filename_for_step_rename_e2sfca_png:
+  output_png_file_name_for_step_visualizing_e2sfca_geojson:
     type: string
     default: "e2sfca.png"
+  output_boundingbox_file_name_for_step_visualizing_e2sfca_geojson:
+    type: string
+    default: "boundingbox_e2sfca.json"
 
 
 outputs:
@@ -157,12 +174,15 @@ outputs:
   function_2sfca_geodata:
     type: File
     outputSource: function_2sfca/geojson_output
-  #  visualizing_2sfca_geojson_img:
-  #    type: File
-  #    outputSource: visualizing_2sfca_geojson/png_output
-  renamed_2sfca_png:
+  visualizing_2sfca_geojson_png_output:
     type: File
-    outputSource: rename_2sfca_png/renamed_output
+    outputSource: visualizing_2sfca_geojson/png_output
+  visualizing_2sfca_geojson_boundingbox:
+    type: File
+    outputSource: visualizing_2sfca_geojson/boundingbox_output
+#  renamed_2sfca_png:
+#    type: File
+#    outputSource: rename_2sfca_png/renamed_output
 
 
   function_g2sfca_score:
@@ -171,12 +191,16 @@ outputs:
   function_g2sfca_geodata:
     type: File
     outputSource: function_g2sfca/geojson_output
-  #  visualizing_g2sfca_geojson_img:
-  #    type: File
-  #    outputSource: visualizing_g2sfca_geojson/png_output
-  renamed_g2sfca_png:
+  visualizing_g2sfca_geojson_png_output:
     type: File
-    outputSource: rename_g2sfca_png/renamed_output
+    outputSource: visualizing_g2sfca_geojson/png_output
+  visualizing_g2sfca_geojson_boundingbox:
+    type: File
+    outputSource: visualizing_g2sfca_geojson/boundingbox_output
+
+#  renamed_g2sfca_png:
+#    type: File
+#    outputSource: rename_g2sfca_png/renamed_output
 
 
   function_e2sfca_score:
@@ -185,12 +209,15 @@ outputs:
   function_e2sfca_geodata:
     type: File
     outputSource: function_e2sfca/geojson_output
-  #  visualizing_e2sfca_geojson_img:
-  #    type: File
-  #    outputSource: visualizing_e2sfca_geojson/png_output
-  renamed_e2sfca_png:
+  visualizing_e2sfca_geojson_png_output:
     type: File
-    outputSource: rename_e2sfca_png/renamed_output
+    outputSource: visualizing_e2sfca_geojson/png_output
+  visualizing_e2sfca_geojson_boundingbox:
+    type: File
+    outputSource: visualizing_e2sfca_geojson/boundingbox_output
+#  renamed_e2sfca_png:
+#    type: File
+#    outputSource: rename_e2sfca_png/renamed_output
 
 
 

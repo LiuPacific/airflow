@@ -1,3 +1,5 @@
+import json
+
 import geopandas
 import matplotlib.pyplot as plt
 import sys, os
@@ -33,6 +35,10 @@ def visualize(sourceFilePath: str, outputDirPath: str, base_file_name: str, colu
     print(f"lat_bottom={lat_bottom}")
     print(f"lon_right={lon_right}")
     print(f"lat_top={lat_top}")
+
+    with open('boundingbox.json', 'w') as boundingbox_json_file:
+        data = {"lon_left": lon_left, "lat_bottom": lat_bottom, "lon_right": lon_right, "lat_top": lat_top}
+        json.dump(data, boundingbox_json_file, indent=4)
 
 
 if __name__ == '__main__':

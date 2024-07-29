@@ -9,19 +9,34 @@ inputs:
   source_geojson_file_path:
     type: File
     inputBinding:
-      position: 1
+      position: 2
   column_name_to_show:
     type: string
     default: "Ai"
     inputBinding:
-      position: 2
-
+      position: 3
+  output_png_file_name:
+    type: string
+    default: "default.png"
+    inputBinding:
+      position: 4
+  output_boundingbox_file_name:
+    type: string
+    default: "boundingbox_default.json"
+    inputBinding:
+      position: 5
 stdout: output.txt
 outputs:
   png_output:
     type: File
     outputBinding:
       glob: "*.png"
+      outputEval: ${self[0].basename=inputs.output_png_file_name; return self;}
+  boundingbox_output:
+    type: File
+    outputBinding:
+      glob: "boundingbox.json"
+      outputEval: ${self[0].basename=inputs.output_boundingbox_file_name; return self;}
   lon_left:
     type: float
     outputBinding:

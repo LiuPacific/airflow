@@ -1,5 +1,5 @@
 {
-    "workflow_name": "hara_2sfca_transparent",
+    "workflow_name": "hara_2sfca_rename",
     "main_cwl": {
         "cwlVersion": "v1.2",
         "class": "Workflow",
@@ -48,10 +48,13 @@
                 "run": "render_geojson_docker.cwl.yaml",
                 "in": {
                     "source_geojson_file_path": "function_2sfca/geojson_output",
-                    "column_name_to_show": "column_name_to_show_for_step_visualizing_2sfca_geojson"
+                    "column_name_to_show": "column_name_to_show_for_step_visualizing_2sfca_geojson",
+                    "output_png_file_name": "output_png_file_name_for_step_visualizing_2sfca_geojson",
+                    "output_boundingbox_file_name": "output_boundingbox_file_name_for_step_visualizing_2sfca_geojson"
                 },
                 "out": [
                     "png_output",
+                    "boundingbox_output",
                     "lon_left",
                     "lat_bottom",
                     "lon_right",
@@ -62,17 +65,8 @@
                 "run": "debug_show_float.cwl.yaml",
                 "in": {
                     "input_float": "visualizing_2sfca_geojson/lat_bottom"
-                }
-            },
-            "rename_2sfca_png": {
-                "run": "rename.cwl.yaml",
-                "in": {
-                    "file_to_rename": "visualizing_2sfca_geojson/png_output",
-                    "new_filename": "new_filename_for_step_rename_2sfca_png"
                 },
-                "out": [
-                    "renamed_output"
-                ]
+                "out": []
             },
             "function_g2sfca": {
                 "run": "function_2sfca.cwl.yaml",
@@ -90,24 +84,17 @@
                 "run": "render_geojson_docker.cwl.yaml",
                 "in": {
                     "source_geojson_file_path": "function_g2sfca/geojson_output",
-                    "column_name_to_show": "column_name_to_show_for_step_visualizing_g2sfca_geojson"
+                    "column_name_to_show": "column_name_to_show_for_step_visualizing_g2sfca_geojson",
+                    "output_png_file_name": "output_png_file_name_for_step_visualizing_g2sfca_geojson",
+                    "output_boundingbox_file_name": "output_boundingbox_file_name_for_step_visualizing_g2sfca_geojson"
                 },
                 "out": [
                     "png_output",
+                    "boundingbox_output",
                     "lon_left",
                     "lat_bottom",
                     "lon_right",
                     "lat_top"
-                ]
-            },
-            "rename_g2sfca_png": {
-                "run": "rename.cwl.yaml",
-                "in": {
-                    "file_to_rename": "visualizing_g2sfca_geojson/png_output",
-                    "new_filename": "new_filename_for_step_rename_g2sfca_png"
-                },
-                "out": [
-                    "renamed_output"
                 ]
             },
             "function_e2sfca": {
@@ -125,24 +112,17 @@
                 "run": "render_geojson_docker.cwl.yaml",
                 "in": {
                     "source_geojson_file_path": "function_e2sfca/geojson_output",
-                    "column_name_to_show": "column_name_to_show_for_step_visualizing_e2sfca_geojson"
+                    "column_name_to_show": "column_name_to_show_for_step_visualizing_e2sfca_geojson",
+                    "output_png_file_name": "output_png_file_name_for_step_visualizing_e2sfca_geojson",
+                    "output_boundingbox_file_name": "output_boundingbox_file_name_for_step_visualizing_e2sfca_geojson"
                 },
                 "out": [
                     "png_output",
+                    "boundingbox_output",
                     "lon_left",
                     "lat_bottom",
                     "lon_right",
                     "lat_top"
-                ]
-            },
-            "rename_e2sfca_png": {
-                "run": "rename.cwl.yaml",
-                "in": {
-                    "file_to_rename": "visualizing_e2sfca_geojson/png_output",
-                    "new_filename": "new_filename_for_step_rename_e2sfca_png"
-                },
-                "out": [
-                    "renamed_output"
                 ]
             }
         },
@@ -156,20 +136,32 @@
                 "default": 0
             },
             "column_name_to_show_for_step_visualizing_2sfca_geojson": "string",
-            "new_filename_for_step_rename_2sfca_png": {
+            "output_png_file_name_for_step_visualizing_2sfca_geojson": {
                 "type": "string",
                 "default": "2sfca.png"
             },
+            "output_boundingbox_file_name_for_step_visualizing_2sfca_geojson": {
+                "type": "string",
+                "default": "boundingbox_2sfca.json"
+            },
             "gauss_upper_limit_for_step_function_g2sfca": "int",
             "column_name_to_show_for_step_visualizing_g2sfca_geojson": "string",
-            "new_filename_for_step_rename_g2sfca_png": {
+            "output_png_file_name_for_step_visualizing_g2sfca_geojson": {
                 "type": "string",
                 "default": "g2sfca.png"
             },
+            "output_boundingbox_file_name_for_step_visualizing_g2sfca_geojson": {
+                "type": "string",
+                "default": "boundingbox_g2sfca.json"
+            },
             "column_name_to_show_for_step_visualizing_e2sfca_geojson": "string",
-            "new_filename_for_step_rename_e2sfca_png": {
+            "output_png_file_name_for_step_visualizing_e2sfca_geojson": {
                 "type": "string",
                 "default": "e2sfca.png"
+            },
+            "output_boundingbox_file_name_for_step_visualizing_e2sfca_geojson": {
+                "type": "string",
+                "default": "boundingbox_e2sfca.json"
             }
         },
         "outputs": {
@@ -181,9 +173,13 @@
                 "type": "File",
                 "outputSource": "function_2sfca/geojson_output"
             },
-            "renamed_2sfca_png": {
+            "visualizing_2sfca_geojson_png_output": {
                 "type": "File",
-                "outputSource": "rename_2sfca_png/renamed_output"
+                "outputSource": "visualizing_2sfca_geojson/png_output"
+            },
+            "visualizing_2sfca_geojson_boundingbox": {
+                "type": "File",
+                "outputSource": "visualizing_2sfca_geojson/boundingbox_output"
             },
             "function_g2sfca_score": {
                 "type": "File",
@@ -193,9 +189,13 @@
                 "type": "File",
                 "outputSource": "function_g2sfca/geojson_output"
             },
-            "renamed_g2sfca_png": {
+            "visualizing_g2sfca_geojson_png_output": {
                 "type": "File",
-                "outputSource": "rename_g2sfca_png/renamed_output"
+                "outputSource": "visualizing_g2sfca_geojson/png_output"
+            },
+            "visualizing_g2sfca_geojson_boundingbox": {
+                "type": "File",
+                "outputSource": "visualizing_g2sfca_geojson/boundingbox_output"
             },
             "function_e2sfca_score": {
                 "type": "File",
@@ -205,9 +205,13 @@
                 "type": "File",
                 "outputSource": "function_e2sfca/geojson_output"
             },
-            "renamed_e2sfca_png": {
+            "visualizing_e2sfca_geojson_png_output": {
                 "type": "File",
-                "outputSource": "rename_e2sfca_png/renamed_output"
+                "outputSource": "visualizing_e2sfca_geojson/png_output"
+            },
+            "visualizing_e2sfca_geojson_boundingbox": {
+                "type": "File",
+                "outputSource": "visualizing_e2sfca_geojson/boundingbox_output"
             }
         },
         "$namespaces": {
@@ -360,6 +364,20 @@
                     "inputBinding": {
                         "position": 2
                     }
+                },
+                "output_png_file_name": {
+                    "type": "string",
+                    "default": "default.png",
+                    "inputBinding": {
+                        "position": 4
+                    }
+                },
+                "output_boundingbox_file_name": {
+                    "type": "string",
+                    "default": "boundingbox_default.json",
+                    "inputBinding": {
+                        "position": 5
+                    }
                 }
             },
             "stdout": "output.txt",
@@ -367,7 +385,15 @@
                 "png_output": {
                     "type": "File",
                     "outputBinding": {
-                        "glob": "*.png"
+                        "glob": "*.png",
+                        "outputEval": "${self[0].basename=inputs.output_png_file_name; return self;}"
+                    }
+                },
+                "boundingbox_output": {
+                    "type": "File",
+                    "outputBinding": {
+                        "glob": "boundingbox.json",
+                        "outputEval": "${self[0].basename=inputs.output_boundingbox_file_name; return self;}"
                     }
                 },
                 "lon_left": {
@@ -405,36 +431,6 @@
             },
             "requirements": {
                 "InlineJavascriptRequirement": {}
-            }
-        },
-        "rename.cwl.yaml": {
-            "cwlVersion": "v1.2",
-            "class": "CommandLineTool",
-            "baseCommand": [
-                "mv"
-            ],
-            "inputs": {
-                "file_to_rename": {
-                    "type": "File",
-                    "inputBinding": {
-                        "position": 1
-                    }
-                },
-                "new_filename": {
-                    "type": "string",
-                    "default": "renamed_output.txt",
-                    "inputBinding": {
-                        "position": 2
-                    }
-                }
-            },
-            "outputs": {
-                "renamed_output": {
-                    "type": "File",
-                    "outputBinding": {
-                        "glob": "$(inputs.new_filename)"
-                    }
-                }
             }
         },
         "debug_show_float.cwl.yaml":{
