@@ -195,7 +195,7 @@ class HaraSerializedDagModel(Base):
         :param session: ORM Session
         :returns: a dict of DAGs read from database
         """
-        serialized_dags = session.query(cls)
+        serialized_dags = session.query(cls).filter(cls.row_status.is_(0)).all()
 
         dags = {}
         for row in serialized_dags:
@@ -325,7 +325,7 @@ class HaraSerializedDagModel(Base):
         """
         for dag in dags:
             if not dag.is_subdag:
-                SerializedDagModel.write_dag(
+                HaraSerializedDagModel.write_dag(
                     dag=dag,
                     min_update_interval=MIN_SERIALIZED_DAG_UPDATE_INTERVAL,
                     processor_subdir=processor_subdir,
