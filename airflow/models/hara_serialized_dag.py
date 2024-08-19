@@ -225,25 +225,24 @@ class HaraSerializedDagModel(Base):
         return self.__data_cache
 
     @property
-    @provide_session
-    def dag(self,  session: Session = None):
+    # @provide_session
+    def dag(self): #,  session: Session = None):
         """The DAG deserialized from the ``data`` column"""
         SerializedDAG._load_operator_extra_links = self.load_op_links
 
         # hara change starts: serialized dag doesn't work since it's not the true full dag. I use pickle dag tentatively.
-        # if isinstance(self.data, dict):
-        #     dag = SerializedDAG.from_dict(self.data)
-        # else:
-        #     dag = SerializedDAG.from_json(self.data)
-        # return dag
+        if isinstance(self.data, dict):
+            dag = SerializedDAG.from_dict(self.data)
+        else:
+            dag = SerializedDAG.from_json(self.data)
+        return dag
 
-        from airflow.models.dagpickle import DagPickle
-        from airflow.models.dag import DagModel
-        dag = session.query(DagModel).filter(DagModel.dag_id == self.dag_id).first()
-        dag_pickle = session.query(DagPickle).filter(DagPickle.id == dag.pickle_id).first()
-        dag_obj = dag_pickle.pickle
-        session.commit()
-        return dag_obj
+        # from airflow.models.dagpickle import DagPickle
+        # from airflow.models.dag import DagModel
+        # dag = session.query(DagModel).filter(DagModel.dag_id == self.dag_id).first()
+        # dag_pickle = session.query(DagPickle).filter(DagPickle.id == dag.pickle_id).first()
+        # dag_obj = dag_pickle.pickle
+        # return dag_obj
         # hara change ends;
 
     @classmethod

@@ -315,6 +315,15 @@ class DagBag(LoggingMixin):
         # hara change ends
         row.load_op_links = self.load_op_links
         dag = row.dag
+
+        # hara change starts: serialized dag doesn't work since it's not the true full dag. I use pickle dag tentatively.
+        from airflow.models.dagpickle import DagPickle
+        from airflow.models.dag import DagModel
+        dag = session.query(DagModel).filter(DagModel.dag_id == dag_id).first()
+        dag_pickle = session.query(DagPickle).filter(DagPickle.id == dag.pickle_id).first()
+        dag = dag_pickle.pickle
+
+        # hara change ends;
         for subdag in dag.subdags:
             self.dags[subdag.dag_id] = subdag
         self.dags[dag.dag_id] = dag
