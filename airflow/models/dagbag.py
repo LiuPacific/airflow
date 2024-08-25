@@ -251,7 +251,7 @@ class DagBag(LoggingMixin):
                 del self.dags[dag_id]
         return self.dags.get(dag_id)
 
-    # hara change starts: get_dag to get_hara_serialized_dag
+    # hara change starts: get_dag to get_hara_serialized_dag.
     @provide_session
     def get_hara_serialized_dag(self, dag_id, session: Session = None):
         """

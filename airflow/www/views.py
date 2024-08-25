@@ -3466,7 +3466,10 @@ class Airflow(AirflowBaseView):
     def task_instances(self):
         """Shows task instances."""
         dag_id = request.args.get("dag_id")
-        dag = get_airflow_app().dag_bag.get_dag(dag_id)
+        # hara change starts: view/task_instance get dag from hara_serizlized_dag and pickle_dag
+        # dag = get_airflow_app().dag_bag.get_dag(dag_id)
+        dag = get_airflow_app().dag_bag.get_hara_serialized_dag(dag_id)
+        # hara change ends
 
         dttm = request.args.get("execution_date")
         if dttm:
