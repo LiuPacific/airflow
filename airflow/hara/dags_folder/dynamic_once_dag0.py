@@ -42,6 +42,8 @@ def create_dag(dag_id, owner, start_date, retry_delay_minutes):
     )
 
     task2.set_upstream(task1)
+    task3.set_upstream(task1)
+    task4.set_upstream(task2)
     task4.set_upstream(task3)
     # task1 >> task2 >> task3
     # task2 >> task3

@@ -1,5 +1,5 @@
 from airflow.hara.cwl_tools.config import constants
-
+from airflow.hara.cwl_tools.tools import cwl_log
 
 def get_task_info_key(step_name) -> str:
     return constants.get_hara_context().run_id + '_task_info_' + step_name
@@ -26,6 +26,7 @@ def get_completed_key() -> str:
 
 
 def get_node_completed_num() -> int:
+    cwl_log.get_cwl_logger().info("get_node_completed_num: %s", get_completed_key())
     completed_num = constants.get_hara_context().kvdb.get(get_completed_key())
     if completed_num is None:
         completed_num = 0

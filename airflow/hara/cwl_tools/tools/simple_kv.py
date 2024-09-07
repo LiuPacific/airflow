@@ -3,7 +3,7 @@ import os.path
 import threading
 from typing import Any
 from airflow.hara.cwl_tools.tools.abstract_kv import AbstractKVDB
-
+from airflow.hara.cwl_tools.tools import cwl_log
 
 class SimpleFileKVDB(AbstractKVDB):
     def __init__(self, file_path: str):
@@ -19,7 +19,10 @@ class SimpleFileKVDB(AbstractKVDB):
     def _load_data(self) -> dict:
         try:
             with open(self.file_path, "r") as file:
-                return json.load(file)
+                data = json.load(file)
+                print("---asd")
+                cwl_log.get_cwl_logger().info("file_kv data: %s", data)
+                return data
         except (FileNotFoundError, json.JSONDecodeError):
             return {}
 
