@@ -7,6 +7,7 @@ from airflow.hara.cwl_tools.tools import cwl_log
 from airflow.hara.cwl_tools.tools.cwl_log import cwl_logger
 from airflow.hara.cwl_tools.tools.lock_wrapper import resource_lock_decorator
 
+
 class SimpleFileKVDB(AbstractKVDB):
     @resource_lock_decorator('/home/typingliu/temp/kv.lock')
     def __init__(self, file_path: str):
@@ -22,9 +23,13 @@ class SimpleFileKVDB(AbstractKVDB):
     def _load_data(self) -> dict:
         try:
             with open(self.file_path, "r") as file:
-                data = json.load(file)
                 print("---asd")
-                cwl_log.get_cwl_logger().info("file_kv data: %s", data)
+                data_txt = file.read()
+                cwl_log.get_cwl_logger().info("file_kv data: #%s#", data_txt)
+
+                data = json.loads(data_txt)
+                # data = json.load(data)
+                # cwl_log.get_cwl_logger().info("file_kv data: %s", data)
                 return data
         except FileNotFoundError as fileNotFoundError:
             cwl_log.get_cwl_logger().info("_load_data %s not found", self.file_path)
@@ -69,6 +74,7 @@ class SimpleFileKVDB(AbstractKVDB):
 
 if __name__ == '__main__':
     import json
+
     with open('/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/config/1.json', "r") as file:
         data = json.load(file)
         print("---asd")
