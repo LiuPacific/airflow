@@ -1,6 +1,4 @@
 import fcntl
-import time
-import os
 from functools import wraps
 
 def resource_lock_decorator(lock_file_path):

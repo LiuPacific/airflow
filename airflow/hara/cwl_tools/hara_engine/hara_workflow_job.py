@@ -500,6 +500,7 @@ class HaraWorkflowJob:
             self.parent_wf = workflow.parent_wf
         self.steps = [WorkflowJobStep(s) for s in workflow.steps]
         ## hara change starts:
+        _logger.info("set workflow step num")
         node_manager.set_workflow_step_num(len(self.steps))
         ## hara change ends;
         self.state: Dict[str, Optional[WorkflowStateItem]] = {}
@@ -608,6 +609,7 @@ class HaraWorkflowJob:
         # step.completed = True
         # change:
         step.completed = True
+        _logger.info("set step to be success and add completed num")
         node_manager.set_task_info(step.name, 'success')
         node_manager.add_node_completed_num()
         ## hara change ends

@@ -35,6 +35,8 @@ from airflow.hara.cwl_tools.hara_engine import hara_command_line_tool, hara_work
 from airflow.hara.cwl_tools.config import constants
 from airflow.hara.cwl_tools.tools import cwl_log
 from airflow.hara.cwl_tools.hara_engine.node_tool import node_manager
+from tests.system.providers.cncf.kubernetes.example_kubernetes_decorator import print_pattern
+
 
 # refer to factory.WorkflowStatus
 class HaraWorkflowStatus(Exception):
@@ -344,3 +346,6 @@ class HaraCwlEngine:
 # job can be WorkflowJob and CommandLineJob
 def serialize_job(job, runtime_context: RuntimeContext):
     pass;
+
+
+

@@ -4,8 +4,11 @@ import threading
 from typing import Any
 from airflow.hara.cwl_tools.tools.abstract_kv import AbstractKVDB
 from airflow.hara.cwl_tools.tools import cwl_log
+from airflow.hara.cwl_tools.tools.cwl_log import cwl_logger
+from airflow.hara.cwl_tools.tools.lock_wrapper import resource_lock_decorator
 
 class SimpleFileKVDB(AbstractKVDB):
+    @resource_lock_decorator('/home/typingliu/temp/kv.lock')
     def __init__(self, file_path: str):
         self.file_path = file_path
         self.lock = threading.Lock()  # Use multiprocessing.Lock() for multi-process scenarios
@@ -23,8 +26,14 @@ class SimpleFileKVDB(AbstractKVDB):
                 print("---asd")
                 cwl_log.get_cwl_logger().info("file_kv data: %s", data)
                 return data
-        except (FileNotFoundError, json.JSONDecodeError):
-            return {}
+        except FileNotFoundError as fileNotFoundError:
+            cwl_log.get_cwl_logger().info("_load_data %s not found", self.file_path)
+        except json.JSONDecodeError as jsonError:
+            with open(self.file_path, "r") as file:
+                data = file.read()
+                cwl_log.get_cwl_logger().info("json error: file is #%s#", data)
+                cwl_log.get_cwl_logger().error(jsonError)
+        return {}
 
     def _write_data(self, data: dict):
         with open(self.file_path, "w") as file:
@@ -50,10 +59,18 @@ class SimpleFileKVDB(AbstractKVDB):
 
 
 ## hara TODO: the locking mechanism remains to upgrade. it couldn't avoid the unexpected writting between load and writing in this program.
+# if __name__ == '__main__':
+#     # Usage example
+#     kvdb = SimpleFileKVDB("/home/typingliu/temp/hara_kv_db.json")
+#     kvdb.set("key1", "value1")
+#     print(kvdb.get("key1"))
+#     kvdb.delete("key1")
+#     print(kvdb.get("key1"))
+
 if __name__ == '__main__':
-    # Usage example
-    kvdb = SimpleFileKVDB("/home/typingliu/temp/hara_kv_db.json")
-    kvdb.set("key1", "value1")
-    print(kvdb.get("key1"))
-    kvdb.delete("key1")
-    print(kvdb.get("key1"))
+    import json
+    with open('/home/typingliu/workspace/tpy/airflow25/airflow/airflow/hara/config/1.json', "r") as file:
+        data = json.load(file)
+        print("---asd")
+        cwl_log.get_cwl_logger().info("file_kv data: %s", data)
+        print(data)

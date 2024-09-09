@@ -1273,9 +1273,10 @@ class SchedulerJob(BaseJob):
         :return: Callback that needs to be executed
         """
         callback: DagCallbackRequest | None = None
-
-        dag = dag_run.dag = self.dagbag.get_dag(dag_run.dag_id, session=session)
-
+        # hara change starts: serialized_dag to hara_serialized_dag
+        # dag = dag_run.dag = self.dagbag.get_dag(dag_run.dag_id, session=session)
+        dag = dag_run.dag = self.dagbag.get_hara_serialized_dag(dag_run.dag_id, session=session)
+        # hara change ends
         if not dag:
             self.log.error("Couldn't find dag %s in DagBag/DB!", dag_run.dag_id)
             return callback
