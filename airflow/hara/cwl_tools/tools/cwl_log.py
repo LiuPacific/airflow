@@ -17,7 +17,7 @@ def setup_logger():
     #     '%(name)s: %(asctime)s | %(levelname)s | %(filename)s:%(lineno)s | %(process)d >>> %(message)s    -----|File "%(pathname)s", line %(lineno)d'
     # )
     cwl_log_formatter = colorlog.ColoredFormatter(
-        '%(name)s: %(white)s%(asctime)s%(reset)s | %(log_color)s%(levelname)s%(reset)s | %(blue)s%(filename)s:%(lineno)s%(reset)s | %(process)d >>> %(log_color)s%(message)s%(reset)s     -----|File "%(pathname)s", line %(lineno)d'
+        '%(name)s: %(white)s%(asctime)s.%(msecs)03d %(reset)s | %(log_color)s%(levelname)s%(reset)s | %(blue)s%(filename)s:%(lineno)s%(reset)s | %(process)d >>> %(log_color)s%(message)s%(reset)s     -----|File "%(pathname)s", line %(lineno)d'
     )
     stdout_handler.setFormatter(cwl_log_formatter)
 

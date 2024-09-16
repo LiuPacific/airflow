@@ -15,7 +15,19 @@ class TestLockWrapper(unittest.TestCase):
             with open(file_path, 'r+') as f:
                 data = f.read()
                 # Simulate some processing (e.g., modifying the content)
-                time.sleep(5)
+                time.sleep(3)
+                print(f"Processing {file_path}: {data}")
+        else:
+            print(f"File {file_path} does not exist.")
+        self.another_process_files(file_path)
+
+    @resource_lock_decorator("./ha.lock")
+    def another_process_files(self, file_path):
+        if os.path.exists(file_path):
+            with open(file_path, 'r+') as f:
+                data = f.read()
+                # Simulate some processing (e.g., modifying the content)
+                time.sleep(3)
                 print(f"Processing {file_path}: {data}")
         else:
             print(f"File {file_path} does not exist.")

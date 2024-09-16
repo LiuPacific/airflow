@@ -14,7 +14,7 @@ def set_task_info(step_name, task_status):
     task_info = {'task_status': task_status}
     constants.get_hara_context().kvdb.set(task_info_key, task_info)
 
-
+@resource_lock_decorator('/home/typingliu/temp/kv.lock')
 def get_task_info(step_name):
     task_info_key = get_task_info_key(step_name)
     task_info = constants.get_hara_context().kvdb.get(task_info_key)
@@ -33,6 +33,7 @@ def add_node_completed_num():
     completed_num = completed_num + 1
     constants.get_hara_context().kvdb.set(get_completed_key(), completed_num)
 
+@resource_lock_decorator('/home/typingliu/temp/kv.lock')
 def get_node_completed_num() -> int:
     cwl_log.get_cwl_logger().info("get_node_completed_num: %s", get_completed_key())
     completed_num = constants.get_hara_context().kvdb.get(get_completed_key())
@@ -44,6 +45,7 @@ def get_node_completed_num() -> int:
 def get_step_num_key() -> str:
     return constants.get_hara_context().run_id + '_step_num'
 
+@resource_lock_decorator('/home/typingliu/temp/kv.lock')
 def get_workflow_step_num() -> int:
     workflow_step_num = constants.get_hara_context().kvdb.get(get_step_num_key())
     if workflow_step_num is None:
