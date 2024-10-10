@@ -3,7 +3,7 @@ script_to_run:
   path: "visualizing_geojson_for_basemap.py"
 source_geojson_file_path:
   class: File
-  path: "./.data/idw_shape_data.geojson"
-column_name_to_show: "MEAN_TAVG"
+  path: "./.data/geometry_shp_file.geojson"
+column_name_to_show: "stnm"
 output_png_file_name: "output_png_test.png"
 output_boundingbox_file_name: "boundingbox_test.json"

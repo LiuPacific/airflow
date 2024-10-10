@@ -375,6 +375,7 @@ def task_run(args, dag=None):
     get_listener_manager().hook.on_starting(component=TaskCommandMarker())
 
 
+    # TODO: hara to change the logic here
     if args.pickle:
         print(f"Loading pickle id: {args.pickle}")
         dag = get_dag_by_pickle(args.pickle)

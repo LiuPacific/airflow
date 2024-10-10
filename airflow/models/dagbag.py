@@ -252,6 +252,8 @@ class DagBag(LoggingMixin):
     #         elif dag_id in self.dags:
     #             del self.dags[dag_id]
     #     return self.dags.get(dag_id)
+
+    # hara change starts: simplify get dag.
     @provide_session
     def get_dag(self, dag_id, session: Session = None):
         """
@@ -271,7 +273,7 @@ class DagBag(LoggingMixin):
             return self.dags.get(dag_id)
 
         return self.dags.get(dag_id)
-
+    # hara change ends
 
 
     @provide_session

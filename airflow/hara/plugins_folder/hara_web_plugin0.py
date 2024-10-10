@@ -198,7 +198,7 @@ def generate_dag(workflow_name: str, main_cwl_dict: dict):
             # multiple dependencies required
             dependency_step = input_path[0:input_path.index('/')]
             cwl_step_task_dict[step_id].set_upstream(
-                cwl_step_task_dict[dependency_step])  # TODO hara: does it work for multiple dependencies?
+                cwl_step_task_dict[dependency_step])
             dependency_steps.append(dependency_step)
             # TODO hara: source, output need to be considered.
         # if len(dependency_steps) > 0:

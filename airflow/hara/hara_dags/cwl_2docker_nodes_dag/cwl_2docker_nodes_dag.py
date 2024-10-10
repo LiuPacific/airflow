@@ -34,7 +34,7 @@ with DAG(
         cwl_step_to_run='writeMessage',
         basedir=basedir,
         job_file_path=job_file_path,
-        main_cwl_file_path=main_cwl_file_path,
+        cwl_work_path=main_cwl_file_path,
     )
 
     task2 = CwlLocalOperator(
