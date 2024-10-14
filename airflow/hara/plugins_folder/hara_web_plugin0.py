@@ -1,14 +1,14 @@
 import json
 
 from flask import Blueprint, jsonify, request
-from requests import HTTPError, Timeout, RequestException
 
+from airflow.models.hara_serialized_dag import HaraSerializedDagModel
 from airflow.plugins_manager import AirflowPlugin
 from airflow.hara.cwl_tools.config import constants
 from airflow.models.dagbag import DagBag
 from airflow.utils.session import NEW_SESSION, provide_session
+from airflow.exceptions import AirflowException, ParamValidationError
 from sqlalchemy.orm.session import Session
-from typing import List
 import requests
 
 import yaml
@@ -21,12 +21,15 @@ blueprint0 = Blueprint(
     url_prefix='/hara_pre'  # URL prefix for all the endpoints in this blueprint
 )
 
+
 @blueprint0.after_request
 def add_headers(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, DELETE, PUT'
-    response.headers['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+    response.headers[
+        'Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
     return response
+
 
 print("hara_web_plugin0 start")
 
@@ -208,6 +211,56 @@ def generate_dag(workflow_name: str, main_cwl_dict: dict):
     return dag_obj
 
 
+# to delete records in the following tables: dag, dag_pickle, serialized_dag, hara_serialized_dag,
+# TODO: whether to delete log, file, task_instance, job, dagrun remains uncertain
+# can be delete together, or can be an offline script doing cleaning job.
+@blueprint0.route('/delete_cwl', methods=['DELETE'])
+def delete_cwl():
+    dag_id = request.values.get("dag_id")
+
+    try:
+        delete_cwl_db(dag_id)
+        # delete files will be in a separate cleaning script: cwl, log, dag file, running files under the dag_id
+    except Exception as e:
+        # TODO error response: 400, 500, 404 ...
+        return jsonify({"message": str(e), "dag_id": dag_id}), 500
+    return jsonify({"message": "success", "dag_id": dag_id}), 200
+
+
+@provide_session
+def delete_cwl_db(dag_id: str, session: Session = None):
+    from airflow.exceptions import DagNotFound
+    from airflow.api.common import delete_dag
+
+    try:
+        session.begin()
+
+        # perform original delete logic
+        delete_dag.delete_dag(dag_id, session=session)
+        if HaraSerializedDagModel.has_dag(dag_id=dag_id, session=session):
+            HaraSerializedDagModel.remove_dag(dag_id=dag_id, session=session)
+
+        session.commit()
+
+    except DagNotFound as error:
+        print(f"DAG with id {dag_id} not found. Cannot delete", "error")
+        session.rollback()
+        raise error
+    except AirflowException as error:
+        print(
+            f"Cannot delete DAG with id {dag_id} because some task instances of the DAG "
+            "are still running. Please mark the  task instances as "
+            "failed/succeeded before deleting the DAG",
+            "error",
+        )
+        session.rollback()
+        raise error
+    finally:
+        session.close()
+
+    return 0;
+
+
 # job.yaml is required
 # workflow_name is required
 # other files can be uploaded together
@@ -362,6 +415,7 @@ def register_cwl(dag_obj, session: Session = NEW_SESSION):
 
 
 from airflow.models import DagModel
+
 
 @blueprint0.route('/dags', methods=['GET'])
 def dags():

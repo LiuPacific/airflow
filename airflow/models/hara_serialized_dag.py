@@ -131,7 +131,7 @@ class HaraSerializedDagModel(Base):
         # hara change ends
 
     def __repr__(self):
-        return f"<SerializedDag: {self.dag_id}>"
+        return f"<HaraSerializedDag: {self.dag_id}>"
 
     @classmethod
     @provide_session
